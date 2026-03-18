@@ -31,7 +31,7 @@ class _LoginScreen extends State<LoginScreen> {
                     TextFormField(
                         textAlign: TextAlign.center,
                         decoration: InputDecoration(
-                            labelText: 'Hola que tal',
+                            labelText: 'Correo Electronico',
                             hintText: 'ejemplo@email.com',
                             prefixIcon: Icon(Icons.email),
                             border: OutlineInputBorder(borderRadius: BorderRadius.circular(2.2)),
