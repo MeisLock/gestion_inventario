@@ -33,7 +33,7 @@ class _LoginScreen extends State<LoginScreen> {
                 const SizedBox(height: 50),
 
                 Text(
-                  'Correo Electronico Personal',
+                  'Correo Electronico Personal',//Cambio reciente
                   style: const TextStyle(
                     fontSize: 25,
                     fontWeight: FontWeight.w200,
