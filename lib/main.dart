@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gestion_inventario/screens/login_screen.dart';
+import 'package:gestion_inventario/screens/login_screen.dart';//Quitar import de la Home debería de estar en LoginScreen
 
 void main() {
 
@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-        colorSchemeSeed: Colors.blueAccent,
+        scaffoldBackgroundColor: Colors.white,
       ),
       home: const LoginScreen(),
       );
