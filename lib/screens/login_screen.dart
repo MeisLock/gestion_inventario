@@ -159,7 +159,96 @@ class _LoginScreen extends State<LoginScreen>{
                   decorationColor: Color(0xFF3B82F6),
                 ),
               ),
-              // ... Botones de Google, Facebook y registro ...
+              
+              const SizedBox(height: 20),
+ 
+              //Botón Google
+              SizedBox(
+                width: 350,
+                height: 54,
+                child: OutlinedButton(
+                  onPressed: () {
+                    //Añadir lógica de inicio sesión con Google
+                  },
+                  style: OutlinedButton.styleFrom(
+                    backgroundColor: const Color(0xFFF3F4F6),
+                    side: const BorderSide(color: Color(0xFFD1D5DB), width: 1.5),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12),),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        'assets/iconos/google_logo.png',
+                        width: 22,
+                        height: 22,
+                      ),
+
+                      const SizedBox(width: 10),
+
+                      const Text(
+                        'Continuar con Google',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+ 
+              const SizedBox(height: 12),
+ 
+              //Botón Facebook 
+              SizedBox(
+                width: 350,
+                height: 54,
+                child: OutlinedButton(
+                  onPressed: () {
+                    //Añadir lógica de inicio sesión con Facebook
+                  },
+                  style: OutlinedButton.styleFrom(
+                    backgroundColor: const Color.fromRGBO(8, 102, 255, 1),
+                    side: const BorderSide(color: Color.fromRGBO(8, 102, 255, 1), width: 1.5),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12),),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        'assets/iconos/facebook_logo.png',
+                        width: 40,
+                        height: 40,
+                      ),
+
+                      const Text(
+                        'Continuar con Facebook',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+ 
+              const SizedBox(height: 28),
+ 
+              // ── ¿No tienes cuenta? ──
+              const Text(
+                '¿No tienes cuenta? Registrate',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF3B82F6),
+                  decoration: TextDecoration.underline,
+                  decorationColor: Color(0xFF3B82F6),
+                ),
+              ),
             ],
           ),
         ),
