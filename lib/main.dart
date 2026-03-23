@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:gestion_inventario/screens/login_screen.dart';//Quitar import de la Home debería de estar en LoginScreen
-
-void main() {
-
+import 'package:firebase_core/firebase_core.dart';
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(MyApp());
 
 }
