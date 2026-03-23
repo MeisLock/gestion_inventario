@@ -9,7 +9,7 @@ class FirebaseService {
   // 🔹 Subir imagen a Firebase Storage y obtener URL
   Future<String> uploadImage(File imageFile) async {
     final fileName = DateTime.now().millisecondsSinceEpoch.toString();
-    final ref = _storage.ref().child('productos/$fileName.jpg');
+    final ref = _storage.ref().child('Productos/$fileName.jpg');
     await ref.putFile(imageFile);
     return await ref.getDownloadURL();
   }
@@ -23,7 +23,7 @@ class FirebaseService {
     required double precio,
     required String imageUrl,
   }) async {
-    await _firestore.collection('productos').add({
+    await _firestore.collection('Productos').add({
       'nombre': nombre,
       'descripcion': descripcion,
       'sistemaOperativo': sistemaOperativo,
@@ -35,6 +35,6 @@ class FirebaseService {
 
   // 🔹 Obtener productos en tiempo real para mostrarlos en HomeScreen
   Stream<QuerySnapshot> getProductos() {
-    return _firestore.collection('productos').snapshots();
+    return _firestore.collection('Productos').snapshots();
   }
 }
