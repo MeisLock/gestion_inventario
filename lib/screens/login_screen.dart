@@ -12,7 +12,7 @@ class _LoginScreen extends State<LoginScreen>{
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
+        child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 28.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -20,13 +20,13 @@ class _LoginScreen extends State<LoginScreen>{
  
               const SizedBox(height: 40),
  
-              // ── Título ──
+              //Título
               const Text(
                 'Iniciar Sesión',
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w800,
-                  color: Color(0xFF111827),
+                  color: Colors.black,
                 ),
               ),
  
@@ -37,20 +37,20 @@ class _LoginScreen extends State<LoginScreen>{
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF6B7280),
+                  color: Color.fromARGB(255, 131, 131, 131),
                 ),
               ),
  
               const SizedBox(height: 36),
  
-              // ── Campo Email ──
+              //Campo Email
               buildLabel('Correo electronico'),
               const SizedBox(height: 8),
               TextField(
                 textAlign: TextAlign.left,
                   decoration: InputDecoration(
                     hintText: 'email@domain.com', 
-                    hintStyle: const TextStyle(color: Color(0xFFADB5BD), fontSize: 15),   
+                    hintStyle: const TextStyle(color: Color.fromARGB(186, 66, 70, 75), fontSize: 15),   
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -59,13 +59,13 @@ class _LoginScreen extends State<LoginScreen>{
  
               const SizedBox(height: 16),
  
-              // ── Campo Contraseña ──
+              //Campo Contraseña
               buildLabel('Contraseña'),
               TextField(
                 textAlign: TextAlign.left,
                   decoration: InputDecoration(
                     hintText: 'Password', 
-                    hintStyle: const TextStyle(color: Color(0xFFADB5BD), fontSize: 15),   
+                    hintStyle: const TextStyle(color: Color.fromARGB(186, 66, 70, 75), fontSize: 15),   
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -73,14 +73,14 @@ class _LoginScreen extends State<LoginScreen>{
                 ),
               const SizedBox(height: 20),
  
-              // ── Botón Login ──
+              //Botón Login
               SizedBox(
                 width: 350,
                 height: 54,
                 child: ElevatedButton(
                   onPressed:() {
                     
-                  }, // TODO: añade tu lógica de login
+                  }, //Añadir lógica del login
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black,
                     disabledBackgroundColor: Colors.black,
@@ -102,7 +102,7 @@ class _LoginScreen extends State<LoginScreen>{
  
               const SizedBox(height: 20),
  
-              // ── ¿Olvidaste contraseña? ──
+              //¿Olvidaste contraseña?
               const Text(
                 '¿Has olvidado la contraseña?',
                 style: TextStyle(
@@ -116,7 +116,7 @@ class _LoginScreen extends State<LoginScreen>{
  
               const SizedBox(height: 28),
  
-              // ── Divider "o continue con" ──
+              // Separador
               const Row(
                 children: [
                   Expanded(child: Divider(color: Color(0xFFD1D5DB))),
@@ -132,37 +132,36 @@ class _LoginScreen extends State<LoginScreen>{
  
               const SizedBox(height: 20),
  
-              // ── Botón Google ──
+              //Botón Google
               SizedBox(
                 width: 350,
                 height: 54,
                 child: OutlinedButton(
                   onPressed: () {
-                    
-                  }, // TODO: añade tu lógica de Google
+                    //Añadir lógica de inicio sesión con Google
+                  },
                   style: OutlinedButton.styleFrom(
                     backgroundColor: const Color(0xFFF3F4F6),
-                    side: const BorderSide(
-                        color: Color(0xFFD1D5DB), width: 1.5),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    side: const BorderSide(color: Color(0xFFD1D5DB), width: 1.5),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12),),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      SizedBox(
+                      Image.asset(
+                        'assets/iconos/google_logo.png',
                         width: 22,
                         height: 22,
-                        child: CustomPaint(),
                       ),
+
                       const SizedBox(width: 10),
+
                       const Text(
                         'Continuar con Google',
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF111827),
+                          color: Colors.black,
                         ),
                       ),
                     ],
@@ -172,50 +171,34 @@ class _LoginScreen extends State<LoginScreen>{
  
               const SizedBox(height: 12),
  
-              // ── Botón Facebook ──
+              //Botón Facebook 
               SizedBox(
-                width: double.infinity,
+                width: 350,
                 height: 54,
-                child: ElevatedButton(
-                  onPressed:() {
-                    
-                  }, // TODO: añade tu lógica de Facebook
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1877F2),
-                    disabledBackgroundColor: const Color(0xFF1877F2),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 0,
+                child: OutlinedButton(
+                  onPressed: () {
+                    //Añadir lógica de inicio sesión con Facebook
+                  },
+                  style: OutlinedButton.styleFrom(
+                    backgroundColor: const Color.fromRGBO(8, 102, 255, 1),
+                    side: const BorderSide(color: Color.fromRGBO(8, 102, 255, 1), width: 1.5),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12),),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Container(
-                        width: 22,
-                        height: 22,
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Center(
-                          child: Text(
-                            'f',//Cambiar logo Facebook ver como se puede poner imagen
-                            style: TextStyle(
-                              color: Color(0xFF1877F2),
-                              fontWeight: FontWeight.w900,
-                              fontSize: 15,
-                            ),
-                          ),
-                        ),
+                      Image.asset(
+                        'assets/iconos/facebook_logo.png',
+                        width: 40,
+                        height: 40,
                       ),
-                      const SizedBox(width: 10),
+
                       const Text(
-                        'Continue con Facebook',
+                        'Continuar con Facebook',
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
-                          color: Colors.white,
+                          color: Colors.black,
                         ),
                       ),
                     ],
@@ -253,7 +236,7 @@ class _LoginScreen extends State<LoginScreen>{
         style: const TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w700,
-          color: Color(0xFF111827),
+          color: Colors.black,
         ),
       ),
     );
