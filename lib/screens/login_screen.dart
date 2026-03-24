@@ -247,46 +247,6 @@ class _LoginScreen extends State<LoginScreen> {
 
               const SizedBox(height: 12),
 
-              //Botón Facebook
-              SizedBox(
-                width: 350,
-                height: 54,
-                child: OutlinedButton(
-                  onPressed: () {
-                    //Añadir lógica de inicio sesión con Facebook
-                  },
-                  style: OutlinedButton.styleFrom(
-                    backgroundColor: const Color.fromRGBO(8, 102, 255, 1),
-                    side: const BorderSide(
-                      color: Color.fromRGBO(8, 102, 255, 1),
-                      width: 1.5,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        'assets/iconos/facebook_logo.png',
-                        width: 40,
-                        height: 40,
-                      ),
-
-                      const Text(
-                        'Continuar con Facebook',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
               const SizedBox(height: 28),
 
               // ── ¿No tienes cuenta? ──
