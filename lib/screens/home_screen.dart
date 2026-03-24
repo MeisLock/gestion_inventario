@@ -15,13 +15,13 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreen extends State<HomeScreen> {
   final FirebaseService _firebaseService = FirebaseService();
 
-  // 🔹 Variables para filtros
+  // Variables para filtros
   double? _precioMin;
   double? _precioMax;
   String? _sistemaOperativo;
   bool? _enStock;
 
-  // 🔹 Modal de filtros
+  // Modal de filtros
   void _mostrarFiltros() {
     showModalBottomSheet(
       context: context,
@@ -43,7 +43,7 @@ class _HomeScreen extends State<HomeScreen> {
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch, // 🔹 CAMBIO: ancho consistente
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const Text(
                     "Filtros",
@@ -52,14 +52,14 @@ class _HomeScreen extends State<HomeScreen> {
                   ),
                   const SizedBox(height: 10),
 
-                  // 🔹 RANGO DE PRECIO con descripción y valores
+                  // Barra de precios con descripción
                   const Text(
-                    "Rango de precios del producto", // 🔹 CAMBIO
+                    "Rango de precios del producto",
                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
                   ),
                   const SizedBox(height: 5),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween, // 🔹 CAMBIO
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text("\$${min.toStringAsFixed(0)}"),
                       Text("\$${max.toStringAsFixed(0)}"),
@@ -81,10 +81,9 @@ class _HomeScreen extends State<HomeScreen> {
                       });
                     },
                   ),
-
                   const SizedBox(height: 10),
 
-                  // 🔹 Sistema Operativo centrado
+                  // Sistema operativo centrado y con borde
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     decoration: BoxDecoration(
@@ -96,7 +95,7 @@ class _HomeScreen extends State<HomeScreen> {
                       value: sistema,
                       isExpanded: true,
                       underline: const SizedBox(),
-                      items: ["Android", "iOS"].map((e) {
+                      items: ["Android", "IOS"].map((e) {
                         return DropdownMenuItem(value: e, child: Text(e));
                       }).toList(),
                       onChanged: (value) {
@@ -106,10 +105,9 @@ class _HomeScreen extends State<HomeScreen> {
                       },
                     ),
                   ),
-
                   const SizedBox(height: 10),
 
-                  // 🔹 Stock alineado al ancho
+                  // Stock alineado con borde
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     decoration: BoxDecoration(
@@ -128,7 +126,6 @@ class _HomeScreen extends State<HomeScreen> {
                       },
                     ),
                   ),
-
                   const SizedBox(height: 15),
 
                   ElevatedButton(
@@ -253,7 +250,7 @@ class _HomeScreen extends State<HomeScreen> {
                       children: [
                         const SizedBox(width: 15),
                         OutlinedButton.icon(
-                          onPressed: _mostrarFiltros, // 🔹 CAMBIO: ahora abre modal
+                          onPressed: _mostrarFiltros,
                           icon: const Icon(
                             Icons.filter_list,
                             color: Color.fromARGB(255, 98, 98, 98),
@@ -308,17 +305,30 @@ class _HomeScreen extends State<HomeScreen> {
 
             final productosFirebase = snapshot.data!.docs;
 
-            // 🔹 FILTROS APLICADOS CON CONTROL DE NULLS
+            // FILTROS APLICADOS CON SEGURIDAD
             final productosFiltrados = productosFirebase.where((doc) {
               final data = doc.data() as Map<String, dynamic>;
 
-              final precio = (data["precio"] ?? 0).toDouble(); // 🔹 CAMBIO
-              final sistema = data["sistema"] as String?;        // 🔹 CAMBIO
-              final stock = (data["stock"] ?? 0) as int;        // 🔹 CAMBIO
+              final precio = (data["precio"] ?? 0).toDouble();
+              final stock = (data["stock"] ?? 0) as int;
+
+              // FILTRO SISTEMA OPERATIVO ROBUSTO
+              final sistema = ((data["sistema"] ??
+                          data["sistemaOperativo"] ??
+                          data["SO"] ??
+                          "")
+                      .toString())
+                  .trim()
+                  .toUpperCase();
+              final filtroSistema = _sistemaOperativo?.trim().toUpperCase();
 
               if (_precioMin != null && precio < _precioMin!) return false;
               if (_precioMax != null && precio > _precioMax!) return false;
-              if (_sistemaOperativo != null && sistema != _sistemaOperativo) return false;
+
+              if (filtroSistema != null && filtroSistema.isNotEmpty) {
+                if (sistema != filtroSistema) return false;
+              }
+
               if (_enStock == true && stock <= 0) return false;
 
               return true;
@@ -331,10 +341,10 @@ class _HomeScreen extends State<HomeScreen> {
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
               ),
-              itemCount: productosFiltrados.length, // 🔹 CAMBIO
+              itemCount: productosFiltrados.length,
               itemBuilder: (context, index) {
                 final producto =
-                    productosFiltrados[index].data() as Map<String, dynamic>; // 🔹 CAMBIO
+                    productosFiltrados[index].data() as Map<String, dynamic>;
                 return ProductCard(
                   nombre: producto["nombre"] as String,
                   precio: producto["precio"] as double,
