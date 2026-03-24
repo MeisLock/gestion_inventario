@@ -12,14 +12,10 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreen extends State<LoginScreen> {
-  // 🔹 Controladores para email y password
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
-  // 🔹 Instancia de Firebase Auth
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // 🔹 Método para login
   Future<void> _login() async {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
@@ -32,12 +28,7 @@ class _LoginScreen extends State<LoginScreen> {
     }
 
     try {
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-
-      // Login exitoso → ir a HomeScreen
+      await _auth.signInWithEmailAndPassword(email: email, password: password);
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const HomeScreen()),
@@ -52,21 +43,15 @@ class _LoginScreen extends State<LoginScreen> {
   Future<void> _signInWithGoogle() async {
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) return;
 
-      if (googleUser == null) {
-        return;
-      }
-
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
       await _auth.signInWithCredential(credential);
-
       if (!mounted) return;
 
       Navigator.pushReplacement(
@@ -78,9 +63,9 @@ class _LoginScreen extends State<LoginScreen> {
         SnackBar(content: Text('Error de Firebase: ${e.message}')),
       );
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error con Google: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error con Google: $e')),
+      );
     }
   }
 
@@ -93,6 +78,8 @@ class _LoginScreen extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme; 
+
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -102,38 +89,37 @@ class _LoginScreen extends State<LoginScreen> {
             children: [
               const SizedBox(height: 40),
 
-              const Text(
+              Text(
                 'Iniciar Sesión',
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w800,
-                  color: Colors.black,
+                  color: colorScheme.onSurface, 
                 ),
               ),
 
               const SizedBox(height: 4),
 
-              const Text(
+              Text(
                 'Gestor de Inventario',
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: Color.fromARGB(255, 131, 131, 131),
+                  color: colorScheme.onSurface.withValues(alpha: 0.5), 
                 ),
               ),
 
               const SizedBox(height: 36),
 
-              //Campo Email
-              buildLabel('Correo electronico'),
+              buildLabel('Correo electronico', colorScheme),
               const SizedBox(height: 8),
               TextField(
-                controller: _emailController, // 🔹 Conectado a Firebase
+                controller: _emailController,
                 textAlign: TextAlign.left,
                 decoration: InputDecoration(
                   hintText: 'email@domain.com',
-                  hintStyle: const TextStyle(
-                    color: Color.fromARGB(186, 66, 70, 75),
+                  hintStyle: TextStyle(
+                    color: colorScheme.onSurface.withValues(alpha: 0.4), 
                     fontSize: 15,
                   ),
                   border: OutlineInputBorder(
@@ -144,16 +130,15 @@ class _LoginScreen extends State<LoginScreen> {
 
               const SizedBox(height: 16),
 
-              //Campo Contraseña
-              buildLabel('Contraseña'),
+              buildLabel('Contraseña', colorScheme),
               TextField(
-                controller: _passwordController, // 🔹 Conectado a Firebase
+                controller: _passwordController,
                 obscureText: true,
                 textAlign: TextAlign.left,
                 decoration: InputDecoration(
                   hintText: 'Password',
-                  hintStyle: const TextStyle(
-                    color: Color.fromARGB(186, 66, 70, 75),
+                  hintStyle: TextStyle(
+                    color: colorScheme.onSurface.withValues(alpha: 0.4), 
                     fontSize: 15,
                   ),
                   border: OutlineInputBorder(
@@ -164,16 +149,14 @@ class _LoginScreen extends State<LoginScreen> {
 
               const SizedBox(height: 20),
 
-              //Botón Login
               SizedBox(
                 width: 350,
                 height: 54,
                 child: ElevatedButton(
-                  onPressed: _login, // 🔹 Llama a Firebase
+                  onPressed: _login,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    disabledBackgroundColor: Colors.black,
-                    foregroundColor: Colors.black,
+                    backgroundColor: colorScheme.onSurface, 
+                    foregroundColor: colorScheme.surface, 
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -183,14 +166,13 @@ class _LoginScreen extends State<LoginScreen> {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: Colors.white,
                     ),
                   ),
                 ),
               ),
 
-              // ... El resto de tu diseño permanece igual ...
               const SizedBox(height: 20),
+
               const Text(
                 '¿Has olvidado la contraseña?',
                 style: TextStyle(
@@ -204,17 +186,15 @@ class _LoginScreen extends State<LoginScreen> {
 
               const SizedBox(height: 20),
 
-              //Botón Google
               SizedBox(
                 width: 350,
                 height: 54,
                 child: OutlinedButton(
-                  //Añadir lógica de inicio sesión con Google
                   onPressed: _signInWithGoogle,
                   style: OutlinedButton.styleFrom(
-                    backgroundColor: const Color(0xFFF3F4F6),
-                    side: const BorderSide(
-                      color: Color(0xFFD1D5DB),
+                    backgroundColor: colorScheme.surfaceContainerHighest, 
+                    side: BorderSide(
+                      color: colorScheme.outline, 
                       width: 1.5,
                     ),
                     shape: RoundedRectangleBorder(
@@ -229,15 +209,13 @@ class _LoginScreen extends State<LoginScreen> {
                         width: 22,
                         height: 22,
                       ),
-
                       const SizedBox(width: 10),
-
-                      const Text(
+                      Text(
                         'Continuar con Google',
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
-                          color: Colors.black,
+                          color: colorScheme.onSurface, 
                         ),
                       ),
                     ],
@@ -245,11 +223,8 @@ class _LoginScreen extends State<LoginScreen> {
                 ),
               ),
 
-              const SizedBox(height: 12),
-
               const SizedBox(height: 28),
 
-              // ── ¿No tienes cuenta? ──
               GestureDetector(
                 onTap: () {
                   Navigator.push(
@@ -275,15 +250,15 @@ class _LoginScreen extends State<LoginScreen> {
     );
   }
 
-  Widget buildLabel(String text) {
+  Widget buildLabel(String text, ColorScheme colorScheme) {
     return Align(
       alignment: Alignment.centerLeft,
       child: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w700,
-          color: Colors.black,
+          color: colorScheme.onSurface, 
         ),
       ),
     );
