@@ -4,7 +4,6 @@ import 'home_screen.dart';
 import 'register_screen.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-//comentario para probar el commit
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
