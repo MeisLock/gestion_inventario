@@ -15,6 +15,102 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreen extends State<HomeScreen> {
   final FirebaseService _firebaseService = FirebaseService();
 
+// Variables para filtros
+double? _precioMin;
+double? _precioMax;
+String?_sistemaOperativo;
+bool? _enStock;
+
+// El Modal de los filtros
+void _mostrarFiltros() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        double min = _precioMin ?? 0;
+        double max = _precioMax ?? 2000;
+        String? sistema = _sistemaOperativo;
+        bool? stock = _enStock;
+
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+                left: 20,
+                right: 20,
+                top: 20,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text("Filtros", style: TextStyle(fontSize: 18)),
+
+                  // 🔹 RANGO DE PRECIO 0 A 2000
+                  RangeSlider(
+                    values: RangeValues(min, max),
+                    min: 0,
+                    max: 2000,
+                    divisions: 20,
+                    labels: RangeLabels(
+                      min.toStringAsFixed(0),
+                      max.toStringAsFixed(0),
+                    ),
+                    onChanged: (values) {
+                      setModalState(() {
+                        min = values.start;
+                        max = values.end;
+                      });
+                    },
+                  ),
+
+                  // 🔹 SISTEMA OPERATIVO
+                  DropdownButton<String>(
+                    hint: const Text("Sistema Operativo"),
+                    value: sistema,
+                    isExpanded: true,
+                    items: ["Android", "iOS"].map((e) {
+                      return DropdownMenuItem(value: e, child: Text(e));
+                    }).toList(),
+                    onChanged: (value) {
+                      setModalState(() {
+                        sistema = value;
+                      });
+                    },
+                  ),
+
+                  // 🔹 STOCK
+                  CheckboxListTile(
+                    title: const Text("Solo disponibles"),
+                    value: stock ?? false,
+                    onChanged: (value) {
+                      setModalState(() {
+                        stock = value;
+                      });
+                    },
+                  ),
+
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        _precioMin = min;
+                        _precioMax = max;
+                        _sistemaOperativo = sistema;
+                        _enStock = stock;
+                      });
+
+                      Navigator.pop(context);
+                    },
+                    child: const Text("Aplicar filtros"),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -87,7 +183,7 @@ class _HomeScreen extends State<HomeScreen> {
                         const SizedBox(width: 15),
 
                         OutlinedButton.icon(
-                          onPressed: () {},
+                          onPressed:  _mostrarFiltros,
                           icon: const Icon(
                             Icons.filter_list,
                             color: Color.fromARGB(255, 98, 98, 98),
@@ -165,6 +261,25 @@ class _HomeScreen extends State<HomeScreen> {
             }
 
             final productosFirebase = snapshot.data!.docs;
+              
+              // 🔹 FILTROS APLICADOS
+              final productosFiltrados = productosFirebase.where((doc) {
+              final data = doc.data() as Map<String, dynamic>;
+
+              final precio = data["precio"] as double;
+              final sistema = data["sistema"] as String;
+              final stock = data["stock"] as int;
+
+              if (_precioMin != null && precio < _precioMin!) return false;
+              if (_precioMax != null && precio > _precioMax!) return false;
+
+              if (_sistemaOperativo != null &&
+                  sistema != _sistemaOperativo) return false;
+
+              if (_enStock == true && stock <= 0) return false;
+
+              return true;
+            }).toList();
 
             return GridView.builder(
               padding: EdgeInsets.all(20),
@@ -175,10 +290,10 @@ class _HomeScreen extends State<HomeScreen> {
                 crossAxisSpacing: 12,
               ),
 
-              itemCount: productosFirebase.length,
+              itemCount: productosFiltrados.length,
               itemBuilder: (context, index) {
                 final producto =
-                    productosFirebase[index].data() as Map<String, dynamic>;
+                    productosFiltrados[index].data() as Map<String, dynamic>;
                 return ProductCard(
                   nombre: producto["nombre"] as String,
                   precio: producto["precio"] as double,
