@@ -11,9 +11,13 @@ class HomeScreen extends StatefulWidget {
   @override
   State<HomeScreen> createState() => _HomeScreen();
 }
-
+// Pantalla principal con buscador, filtros y listado de productos
 class _HomeScreen extends State<HomeScreen> {
   final FirebaseService _firebaseService = FirebaseService();
+
+  // Buscador
+  final TextEditingController _searchController = TextEditingController();
+  String _busqueda = "";
 
   // Variables para filtros
   double? _precioMin;
@@ -21,7 +25,7 @@ class _HomeScreen extends State<HomeScreen> {
   String? _sistemaOperativo;
   bool? _enStock;
 
-  // Modal de filtros
+  // Modal de los filtros 
   void _mostrarFiltros() {
     showModalBottomSheet(
       context: context,
@@ -52,7 +56,6 @@ class _HomeScreen extends State<HomeScreen> {
                   ),
                   const SizedBox(height: 10),
 
-                  // Barra de precios con descripción
                   const Text(
                     "Rango de precios del producto",
                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
@@ -83,7 +86,6 @@ class _HomeScreen extends State<HomeScreen> {
                   ),
                   const SizedBox(height: 10),
 
-                  // Sistema operativo centrado y con borde
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     decoration: BoxDecoration(
@@ -107,7 +109,6 @@ class _HomeScreen extends State<HomeScreen> {
                   ),
                   const SizedBox(height: 10),
 
-                  // Stock alineado con borde
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     decoration: BoxDecoration(
@@ -147,6 +148,17 @@ class _HomeScreen extends State<HomeScreen> {
           },
         );
       },
+    );
+  }
+
+  // Modal de nuevo producto 
+  void _nuevoProducto() {
+    showDialog(
+      context: context,
+      builder: (_) => const AlertDialog(
+        title: Text("Nuevo producto"),
+        content: Text("Aquí irá el formulario"),
+      ),
     );
   }
 
@@ -235,14 +247,29 @@ class _HomeScreen extends State<HomeScreen> {
                         color: const Color(0xFFF3F4F6),
                         borderRadius: BorderRadius.circular(30),
                       ),
-                      child: const TextField(
+                      child: TextField(
+                        controller: _searchController, // 🔍 añadido
+                        onChanged: (value) {
+                          setState(() {
+                            _busqueda = value.toLowerCase();
+                          });
+                        },
                         decoration: InputDecoration(
                           hintText: 'Buscar producto...',
-                          hintStyle: TextStyle(
+                          hintStyle: const TextStyle(
                             color: Color.fromARGB(181, 0, 0, 0),
                           ),
-                          prefixIcon: Icon(Icons.search),
+                          prefixIcon: const Icon(Icons.search),
                           border: InputBorder.none,
+                          suffixIcon: IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() {
+                                _busqueda = "";
+                              });
+                            },
+                          ),
                         ),
                       ),
                     ),
@@ -268,7 +295,7 @@ class _HomeScreen extends State<HomeScreen> {
                         ),
                         const SizedBox(width: 170),
                         OutlinedButton.icon(
-                          onPressed: () {},
+                          onPressed: _nuevoProducto, // ➕ añadido
                           icon: const Icon(Icons.add,
                               color: Color.fromRGBO(8, 102, 255, 1)),
                           label: const Text('Nuevo'),
@@ -305,14 +332,14 @@ class _HomeScreen extends State<HomeScreen> {
 
             final productosFirebase = snapshot.data!.docs;
 
-            // FILTROS APLICADOS CON SEGURIDAD
             final productosFiltrados = productosFirebase.where((doc) {
               final data = doc.data() as Map<String, dynamic>;
 
+              final nombre =
+                  (data["nombre"] ?? "").toString().toLowerCase(); // 🔍 añadido
               final precio = (data["precio"] ?? 0).toDouble();
               final stock = (data["stock"] ?? 0) as int;
 
-              // FILTRO SISTEMA OPERATIVO ROBUSTO
               final sistema = ((data["sistema"] ??
                           data["sistemaOperativo"] ??
                           data["SO"] ??
@@ -321,6 +348,10 @@ class _HomeScreen extends State<HomeScreen> {
                   .trim()
                   .toUpperCase();
               final filtroSistema = _sistemaOperativo?.trim().toUpperCase();
+
+              // EL filtro de  búsqueda
+              if (_busqueda.isNotEmpty &&
+                  !nombre.contains(_busqueda)) return false;
 
               if (_precioMin != null && precio < _precioMin!) return false;
               if (_precioMax != null && precio > _precioMax!) return false;
@@ -345,9 +376,10 @@ class _HomeScreen extends State<HomeScreen> {
               itemBuilder: (context, index) {
                 final producto =
                     productosFiltrados[index].data() as Map<String, dynamic>;
+
                 return ProductCard(
                   nombre: producto["nombre"] as String,
-                  precio: producto["precio"] as double,
+                  precio: (producto["precio"] ?? 0).toDouble(), // fix
                 );
               },
             );
