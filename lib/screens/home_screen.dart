@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gestion_inventario/widgets/product_card.dart';
 import '../services/firebase_service.dart';
 import 'login_screen.dart';
+import '../theme/theme_controller.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,18 +18,38 @@ class _HomeScreen extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
+      backgroundColor: colorScheme.surface,
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) => [
           SliverAppBar(
-            backgroundColor: Colors.white,
+            backgroundColor: colorScheme.surface,
+            surfaceTintColor: Colors.transparent,
+            iconTheme: IconThemeData(color: colorScheme.onSurface),
             floating: true,
             snap: true,
-            leading: IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.menu, color: Colors.black),
-            ),
+            leading: IconButton(onPressed: () {}, icon: const Icon(Icons.menu)),
             actions: [
+              ValueListenableBuilder<ThemeMode>(
+                valueListenable: ThemeController.themeMode,
+                builder: (context, themeMode, _) {
+                  return IconButton(
+                    onPressed: () {
+                      ThemeController.toggleTheme();
+                    },
+                    icon: Icon(
+                      themeMode == ThemeMode.light
+                          ? Icons.dark_mode
+                          : Icons.light_mode,
+                    ),
+                  );
+                },
+              ),
+
               IconButton(
                 onPressed: () async {
                   await FirebaseAuth.instance.signOut();
@@ -40,15 +61,15 @@ class _HomeScreen extends State<HomeScreen> {
                     MaterialPageRoute(builder: (_) => const LoginScreen()),
                   );
                 },
-                icon: const Icon(Icons.logout, color: Colors.black),
+                icon: const Icon(Icons.logout),
               ),
             ],
-            title: const Text(
+            title: Text(
               'Menu',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w400,
-                color: Colors.black,
+                color: colorScheme.onSurface,
               ),
             ),
             centerTitle: true,
@@ -63,16 +84,21 @@ class _HomeScreen extends State<HomeScreen> {
                     Container(
                       height: 46,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF3F4F6),
+                        color: isDark
+                            ? const Color(0xFF1E1E1E)
+                            : const Color(0xFFF3F4F6),
                         borderRadius: BorderRadius.circular(30),
                       ),
-                      child: const TextField(
+                      child: TextField(
                         decoration: InputDecoration(
                           hintText: 'Buscar producto...',
                           hintStyle: TextStyle(
-                            color: Color.fromARGB(181, 0, 0, 0),
+                            color: colorScheme.onSurfaceVariant,
                           ),
-                          prefixIcon: Icon(Icons.search),
+                          prefixIcon: Icon(
+                            Icons.search,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
                           border: InputBorder.none,
                           enabledBorder: InputBorder.none,
                           focusedBorder: InputBorder.none,
@@ -88,20 +114,22 @@ class _HomeScreen extends State<HomeScreen> {
 
                         OutlinedButton.icon(
                           onPressed: () {},
-                          icon: const Icon(
+                          //Icono del filtro
+                          icon: Icon(
                             Icons.filter_list,
-                            color: Color.fromARGB(255, 98, 98, 98),
+                            color: colorScheme.onSurfaceVariant,
                           ),
-                          label: const Text('Filtro'),
+                          //Texto del filtro
+                          label: Text(
+                            'Filtro',
+                            style: TextStyle(color: colorScheme.onSurface),
+                          ),
                           style: OutlinedButton.styleFrom(
                             side: BorderSide.none,
                             elevation: 3,
-                            backgroundColor: const Color.fromRGBO(
-                              247,
-                              242,
-                              250,
-                              1,
-                            ),
+                            backgroundColor: isDark
+                                ? const Color(0xFF1E1E1E)
+                                : const Color.fromRGBO(247, 242, 250, 1),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
@@ -117,20 +145,19 @@ class _HomeScreen extends State<HomeScreen> {
 
                         OutlinedButton.icon(
                           onPressed: () {},
-                          icon: const Icon(
-                            Icons.add,
-                            color: Color.fromRGBO(8, 102, 255, 1),
+                          //Icono del nuevo producto
+                          icon: Icon(Icons.add, color: colorScheme.primary),
+                          //Texto del nuevo producto
+                          label: Text(
+                            'Nuevo',
+                            style: TextStyle(color: colorScheme.onSurface),
                           ),
-                          label: const Text('Nuevo'),
                           style: OutlinedButton.styleFrom(
                             side: BorderSide.none,
                             elevation: 3,
-                            backgroundColor: const Color.fromRGBO(
-                              247,
-                              242,
-                              250,
-                              1,
-                            ),
+                            backgroundColor: isDark
+                                ? const Color(0xFF1E1E1E)
+                                : const Color.fromRGBO(247, 242, 250, 1),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
