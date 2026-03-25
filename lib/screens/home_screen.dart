@@ -16,6 +16,144 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreen extends State<HomeScreen> {
   final FirebaseService _firebaseService = FirebaseService();
 
+  // 🔹 Variables para filtros
+  double? _precioMin;
+  double? _precioMax;
+  String? _sistemaOperativo;
+  bool? _enStock;
+
+  // 🔹 Modal de filtros
+  void _mostrarFiltros() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        double min = _precioMin ?? 0;
+        double max = _precioMax ?? 2000;
+        String? sistema = _sistemaOperativo;
+        bool? stock = _enStock;
+
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+                left: 20,
+                right: 20,
+                top: 20,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch, // 🔹 CAMBIO: ancho consistente
+                children: [
+                  const Text(
+                    "Filtros",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 10),
+
+                  // 🔹 RANGO DE PRECIO con descripción y valores
+                  const Text(
+                    "Rango de precios del producto", // 🔹 CAMBIO
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(height: 5),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween, // 🔹 CAMBIO
+                    children: [
+                      Text("\$${min.toStringAsFixed(0)}"),
+                      Text("\$${max.toStringAsFixed(0)}"),
+                    ],
+                  ),
+                  RangeSlider(
+                    values: RangeValues(min, max),
+                    min: 0,
+                    max: 2000,
+                    divisions: 20,
+                    labels: RangeLabels(
+                      min.toStringAsFixed(0),
+                      max.toStringAsFixed(0),
+                    ),
+                    onChanged: (values) {
+                      setModalState(() {
+                        min = values.start;
+                        max = values.end;
+                      });
+                    },
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  // 🔹 Sistema Operativo centrado
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade400),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: DropdownButton<String>(
+                      hint: const Text("Sistema Operativo"),
+                      value: sistema,
+                      isExpanded: true,
+                      underline: const SizedBox(),
+                      items: ["Android", "iOS"].map((e) {
+                        return DropdownMenuItem(value: e, child: Text(e));
+                      }).toList(),
+                      onChanged: (value) {
+                        setModalState(() {
+                          sistema = value;
+                        });
+                      },
+                    ),
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  // 🔹 Stock alineado al ancho
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade400),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: CheckboxListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text("Solo disponibles"),
+                      value: stock ?? false,
+                      controlAffinity: ListTileControlAffinity.leading,
+                      onChanged: (value) {
+                        setModalState(() {
+                          stock = value;
+                        });
+                      },
+                    ),
+                  ),
+
+                  const SizedBox(height: 15),
+
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        _precioMin = min;
+                        _precioMax = max;
+                        _sistemaOperativo = sistema;
+                        _enStock = stock;
+                      });
+                      Navigator.pop(context);
+                    },
+                    child: const Text("Aplicar filtros"),
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -53,9 +191,7 @@ class _HomeScreen extends State<HomeScreen> {
               IconButton(
                 onPressed: () async {
                   await FirebaseAuth.instance.signOut();
-
                   if (!context.mounted) return;
-
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -75,12 +211,10 @@ class _HomeScreen extends State<HomeScreen> {
             centerTitle: true,
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(90),
-
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
                 child: Column(
                   children: [
-                    // Barra buscadora
                     Container(
                       height: 46,
                       decoration: BoxDecoration(
@@ -100,18 +234,12 @@ class _HomeScreen extends State<HomeScreen> {
                             color: colorScheme.onSurfaceVariant,
                           ),
                           border: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(vertical: 13),
                         ),
                       ),
                     ),
-
-                    // Botones
                     Row(
                       children: [
                         const SizedBox(width: 15),
-
                         OutlinedButton.icon(
                           onPressed: () {},
                           //Icono del filtro
@@ -133,16 +261,9 @@ class _HomeScreen extends State<HomeScreen> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            minimumSize: const Size(0, 1),
                           ),
                         ),
-
                         const SizedBox(width: 170),
-
                         OutlinedButton.icon(
                           onPressed: () {},
                           //Icono del nuevo producto
@@ -161,11 +282,6 @@ class _HomeScreen extends State<HomeScreen> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            minimumSize: const Size(0, 1),
                           ),
                         ),
                       ],
@@ -176,8 +292,6 @@ class _HomeScreen extends State<HomeScreen> {
             ),
           ),
         ],
-
-        //🔹 Lista de productos desde Firebase
         body: StreamBuilder<QuerySnapshot>(
           stream: _firebaseService.getProductos(),
           builder: (context, snapshot) {
@@ -193,19 +307,33 @@ class _HomeScreen extends State<HomeScreen> {
 
             final productosFirebase = snapshot.data!.docs;
 
+            // 🔹 FILTROS APLICADOS CON CONTROL DE NULLS
+            final productosFiltrados = productosFirebase.where((doc) {
+              final data = doc.data() as Map<String, dynamic>;
+
+              final precio = (data["precio"] ?? 0).toDouble(); // 🔹 CAMBIO
+              final sistema = data["sistema"] as String?;        // 🔹 CAMBIO
+              final stock = (data["stock"] ?? 0) as int;        // 🔹 CAMBIO
+
+              if (_precioMin != null && precio < _precioMin!) return false;
+              if (_precioMax != null && precio > _precioMax!) return false;
+              if (_sistemaOperativo != null && sistema != _sistemaOperativo) return false;
+              if (_enStock == true && stock <= 0) return false;
+
+              return true;
+            }).toList();
+
             return GridView.builder(
-              padding: EdgeInsets.all(20),
-              clipBehavior: Clip.none,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              padding: const EdgeInsets.all(20),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
               ),
-
-              itemCount: productosFirebase.length,
+              itemCount: productosFiltrados.length, // 🔹 CAMBIO
               itemBuilder: (context, index) {
                 final producto =
-                    productosFirebase[index].data() as Map<String, dynamic>;
+                    productosFiltrados[index].data() as Map<String, dynamic>; // 🔹 CAMBIO
                 return ProductCard(
                   nombre: producto["nombre"] as String,
                   precio: producto["precio"] as double,
