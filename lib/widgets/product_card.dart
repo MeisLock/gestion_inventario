@@ -1,30 +1,29 @@
 import 'package:flutter/material.dart';
 
 class ProductCard extends StatelessWidget {
+  const ProductCard({super.key, required this.nombre, required this.precio});
 
-  const ProductCard({
-    super.key, 
-    required this.nombre, 
-    required this.precio,
-    });
-
-    final String nombre;
-    final double precio;
+  final String nombre;
+  final double precio;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       width: 350,
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 255, 255, 255),
+        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.25),
+            color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.25),
             blurRadius: 6,
-            offset: Offset(0, 3)
-          )
-        ]
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       //Imagen(Cambiar lógica al añadir Firebase)
       child: Column(
@@ -34,18 +33,19 @@ class ProductCard extends StatelessWidget {
             child: Container(
               width: 350,
               decoration: BoxDecoration(
-                  color: Color.fromARGB(255, 220, 234, 245),
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(12)
-                  )
+                color: isDark
+                    ? const Color(0xFF2A2A2A)
+                    : const Color.fromARGB(255, 220, 234, 245),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
               ),
               child: Icon(
                 Icons.image_outlined,
-                color: Color.fromARGB(255, 147, 197, 216),
+                color: isDark
+                    ? Colors.white70
+                    : const Color.fromARGB(255, 147, 197, 216),
                 size: 40,
               ),
             ),
-            
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(10, 8, 10, 12),
@@ -55,21 +55,21 @@ class ProductCard extends StatelessWidget {
                 //Nombre producto
                 Text(
                   nombre,
-                  style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.black,
-                  )
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w400,
+                    color: colorScheme.onSurface,
+                  ),
                 ),
 
-                const SizedBox(height: 4,),
+                const SizedBox(height: 4),
                 //Precio Producto
                 Text(
                   precio.toString(),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: Colors.black
+                    color: colorScheme.onSurface,
                   ),
                 ),
               ],
@@ -77,8 +77,6 @@ class ProductCard extends StatelessWidget {
           ),
         ],
       ),
-
     );
-    
   }
 }
