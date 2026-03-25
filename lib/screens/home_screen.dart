@@ -160,7 +160,7 @@ class _HomeScreen extends State<HomeScreen> {
       ),
     );
   }
-
+// Función para construir etiquetas de los campos
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme; 
