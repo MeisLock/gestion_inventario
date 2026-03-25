@@ -1,9 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:gestion_inventario/screens/menu_screen.dart';
+import 'package:gestion_inventario/widgets/dialog_cerrar_sesion.dart';
 import 'package:gestion_inventario/widgets/product_card.dart';
 import '../services/firebase_service.dart';
-import 'login_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,13 +15,11 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreen extends State<HomeScreen> {
   final FirebaseService _firebaseService = FirebaseService();
 
-  // 🔹 Variables para filtros
   double? _precioMin;
   double? _precioMax;
   String? _sistemaOperativo;
   bool? _enStock;
 
-  // 🔹 Modal de filtros
   void _mostrarFiltros() {
     showModalBottomSheet(
       context: context,
@@ -34,6 +32,8 @@ class _HomeScreen extends State<HomeScreen> {
 
         return StatefulBuilder(
           builder: (context, setModalState) {
+            final colorScheme = Theme.of(context).colorScheme; 
+
             return Padding(
               padding: EdgeInsets.only(
                 bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -43,26 +43,32 @@ class _HomeScreen extends State<HomeScreen> {
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch, // 🔹 CAMBIO: ancho consistente
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text(
+                  Text(
                     "Filtros",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.onSurface, 
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 10),
-
-                  // 🔹 RANGO DE PRECIO con descripción y valores
-                  const Text(
-                    "Rango de precios del producto", // 🔹 CAMBIO
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                  Text(
+                    "Rango de precios del producto",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: colorScheme.onSurface, 
+                    ),
                   ),
                   const SizedBox(height: 5),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween, // 🔹 CAMBIO
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text("\$${min.toStringAsFixed(0)}"),
-                      Text("\$${max.toStringAsFixed(0)}"),
+                      Text("\$${min.toStringAsFixed(0)}", style: TextStyle(color: colorScheme.onSurface)), 
+                      Text("\$${max.toStringAsFixed(0)}", style: TextStyle(color: colorScheme.onSurface)), 
                     ],
                   ),
                   RangeSlider(
@@ -81,56 +87,48 @@ class _HomeScreen extends State<HomeScreen> {
                       });
                     },
                   ),
-
                   const SizedBox(height: 10),
-
-                  // 🔹 Sistema Operativo centrado
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade400),
+                      border: Border.all(color: colorScheme.outline), 
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: DropdownButton<String>(
-                      hint: const Text("Sistema Operativo"),
+                      hint: Text("Sistema Operativo", style: TextStyle(color: colorScheme.onSurface)),
                       value: sistema,
                       isExpanded: true,
                       underline: const SizedBox(),
+                      dropdownColor: colorScheme.surface, 
                       items: ["Android", "iOS"].map((e) {
-                        return DropdownMenuItem(value: e, child: Text(e));
+                        return DropdownMenuItem(
+                          value: e,
+                          child: Text(e, style: TextStyle(color: colorScheme.onSurface)),
+                        );
                       }).toList(),
                       onChanged: (value) {
-                        setModalState(() {
-                          sistema = value;
-                        });
+                        setModalState(() => sistema = value);
                       },
                     ),
                   ),
-
                   const SizedBox(height: 10),
-
-                  // 🔹 Stock alineado al ancho
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade400),
+                      border: Border.all(color: colorScheme.outline), 
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: CheckboxListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text("Solo disponibles"),
+                      title: Text("Solo disponibles", style: TextStyle(color: colorScheme.onSurface)), 
                       value: stock ?? false,
                       controlAffinity: ListTileControlAffinity.leading,
                       onChanged: (value) {
-                        setModalState(() {
-                          stock = value;
-                        });
+                        setModalState(() => stock = value);
                       },
                     ),
                   ),
-
                   const SizedBox(height: 15),
-
                   ElevatedButton(
                     onPressed: () {
                       setState(() {
@@ -153,76 +151,75 @@ class _HomeScreen extends State<HomeScreen> {
     );
   }
 
+  void _nuevoProducto() {
+    showDialog(
+      context: context,
+      builder: (_) => const AlertDialog(
+        title: Text("Nuevo producto"),
+        content: Text("Aquí irá el formulario"),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme; 
+
     return Scaffold(
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(color: Colors.blue),
-              child: Text(
-                'Menú',
-                style: TextStyle(color: Colors.white, fontSize: 20),
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.home),
-              title: const Text('Inicio'),
-              onTap: () => Navigator.pop(context),
-            ),
-            ListTile(
-              leading: const Icon(Icons.inventory),
-              title: const Text('Productos'),
-              onTap: () => Navigator.pop(context),
-            ),
-            ListTile(
-              leading: const Icon(Icons.logout),
-              title: const Text('Cerrar sesión'),
-              onTap: () async {
-                await FirebaseAuth.instance.signOut();
-                if (!context.mounted) return;
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (_) => const LoginScreen()),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) => [
           SliverAppBar(
-            backgroundColor: Colors.white,
+            backgroundColor: colorScheme.surface, 
             floating: true,
             snap: true,
-            leading: Builder(
-              builder: (context) => IconButton(
-                onPressed: () => Scaffold.of(context).openDrawer(),
-                icon: const Icon(Icons.menu, color: Colors.black),
-              ),
-            ),
+            leading: 
+              Padding(
+                // 🔹 Añadir un Padding para poder poner margenes para centrar el Icono
+                padding: const EdgeInsets.only(left: 20), 
+                child: 
+                IconButton(
+                  onPressed: () {// 🔹 Creado un Dialog para el submenu de opciones con el switch para el cambio de tema
+                    showGeneralDialog(
+                      context: context,
+                      barrierLabel: 'menu',
+                      barrierDismissible: true,
+                      barrierColor: Colors.transparent,
+                      pageBuilder: (context, animation, secondaryAnimation) {
+                        return const MenuScreenWidget();
+                      },
+                    );
+                  },
+                  icon: Icon(Icons.menu, color: colorScheme.onSurface), 
+                ),
+              ),  
             actions: [
-              IconButton(
-                onPressed: () async {
-                  await FirebaseAuth.instance.signOut();
-                  if (!context.mounted) return;
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+              ValueListenableBuilder<ThemeMode>(
+                valueListenable: ThemeController.themeMode,
+                builder: (context, themeMode, _) {
+                  return IconButton(
+                    onPressed: () {
+                      ThemeController.toggleTheme();
+                    },
+                    icon: Icon(
+                      themeMode == ThemeMode.light
+                          ? Icons.dark_mode
+                          : Icons.light_mode,
+                    ),
                   );
                 },
-                icon: const Icon(Icons.logout, color: Colors.black),
               ),
+              IconButton(
+                onPressed: () => mostrarDialogoCerrarSesion(context),// 🔹 Creado un Dialog para confirmar el cerrar seseión
+                icon: Icon(Icons.logout, color: colorScheme.onSurface), 
+              ),
+              const SizedBox(width: 14,)//🔹 Modificación para centralo más
             ],
-            title: const Text(
+            title: Text(
               'Menu',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w400,
-                color: Colors.black,
+                color: colorScheme.onSurface, 
               ),
             ),
             centerTitle: true,
@@ -234,52 +231,58 @@ class _HomeScreen extends State<HomeScreen> {
                   children: [
                     Container(
                       height: 46,
+                      width: 350,// 🔹 Modificación al tamaño de la barra buscadora
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF3F4F6),
+                        color: colorScheme.surfaceContainerHighest, 
                         borderRadius: BorderRadius.circular(30),
                       ),
-                      child: const TextField(
+                      child: TextField(
                         decoration: InputDecoration(
                           hintText: 'Buscar producto...',
                           hintStyle: TextStyle(
-                            color: Color.fromARGB(181, 0, 0, 0),
+                            color: colorScheme.onSurface.withValues(alpha: 0.4), 
                           ),
-                          prefixIcon: Icon(Icons.search),
+                          prefixIcon: Icon(Icons.search, color: colorScheme.onSurface), 
                           border: InputBorder.none,
+                          suffixIcon: IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() {
+                                _busqueda = "";
+                              });
+                            },
+                          ),
                         ),
                       ),
                     ),
+                    const SizedBox(height: 6,),
                     Row(
                       children: [
-                        const SizedBox(width: 15),
+                        const SizedBox(width: 12),
                         OutlinedButton.icon(
-                          onPressed: _mostrarFiltros, // 🔹 CAMBIO: ahora abre modal
-                          icon: const Icon(
-                            Icons.filter_list,
-                            color: Color.fromARGB(255, 98, 98, 98),
-                          ),
-                          label: const Text('Filtro'),
+                          onPressed: _mostrarFiltros,
+                          icon: Icon(Icons.filter_list, color: colorScheme.onSurface), 
+                          label: Text('Filtro', style: TextStyle(color: colorScheme.onSurface)), 
                           style: OutlinedButton.styleFrom(
                             side: BorderSide.none,
                             elevation: 3,
-                            backgroundColor:
-                                const Color.fromRGBO(247, 242, 250, 1),
+                            backgroundColor: colorScheme.surfaceContainerHighest, 
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
                         ),
-                        const SizedBox(width: 170),
+                        const SizedBox(width: 140),// 🔹 Ajuste al centrado entre botones
                         OutlinedButton.icon(
                           onPressed: () {},
-                          icon: const Icon(Icons.add,
-                              color: Color.fromRGBO(8, 102, 255, 1)),
-                          label: const Text('Nuevo'),
+                          icon: const Icon(Icons.add, color: Color.fromRGBO(8, 102, 255, 1)),
+                          label: Text('Nuevo', style: TextStyle(color: colorScheme.onSurface)), 
                           style: OutlinedButton.styleFrom(
+                            minimumSize: const Size(0, 40),//🔹Modificación del tamaño del Icono Nuevo
                             side: BorderSide.none,
                             elevation: 3,
-                            backgroundColor:
-                                const Color.fromRGBO(247, 242, 250, 1),
+                            backgroundColor: colorScheme.surfaceContainerHighest, 
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
@@ -300,26 +303,34 @@ class _HomeScreen extends State<HomeScreen> {
               return const Center(child: CircularProgressIndicator());
             }
             if (snapshot.hasError) {
-              return const Center(child: Text('Error al cargar productos'));
+              return Center(child: Text('Error al cargar productos', style: TextStyle(color: colorScheme.onSurface))); 
             }
             if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-              return const Center(child: Text('No hay productos'));
+              return Center(child: Text('No hay productos', style: TextStyle(color: colorScheme.onSurface))); 
             }
 
             final productosFirebase = snapshot.data!.docs;
 
-            // 🔹 FILTROS APLICADOS CON CONTROL DE NULLS
             final productosFiltrados = productosFirebase.where((doc) {
               final data = doc.data() as Map<String, dynamic>;
+              final precio = (data["precio"] ?? 0).toDouble();
+              final sistema = data["sistema"] as String?;
+              final stock = (data["stock"] ?? 0) as int;
 
-              final precio = (data["precio"] ?? 0).toDouble(); // 🔹 CAMBIO
-              final sistema = data["sistema"] as String?;        // 🔹 CAMBIO
-              final stock = (data["stock"] ?? 0) as int;        // 🔹 CAMBIO
+              if (_precioMax != null && precio > _precioMax!) {
+                return false;
+              }
 
-              if (_precioMin != null && precio < _precioMin!) return false;
-              if (_precioMax != null && precio > _precioMax!) return false;
-              if (_sistemaOperativo != null && sistema != _sistemaOperativo) return false;
-              if (_enStock == true && stock <= 0) return false;
+              if (filtroSistema != null &&
+                  filtroSistema.isNotEmpty) {
+                if (sistema != filtroSistema) {
+                  return false;
+                }
+              }
+
+              if (_enStock == true && stock <= 0) {
+                return false;
+              }
 
               return true;
             }).toList();
@@ -331,13 +342,12 @@ class _HomeScreen extends State<HomeScreen> {
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
               ),
-              itemCount: productosFiltrados.length, // 🔹 CAMBIO
+              itemCount: productosFiltrados.length,
               itemBuilder: (context, index) {
-                final producto =
-                    productosFiltrados[index].data() as Map<String, dynamic>; // 🔹 CAMBIO
+                final producto = productosFiltrados[index].data() as Map<String, dynamic>;
                 return ProductCard(
                   nombre: producto["nombre"] as String,
-                  precio: producto["precio"] as double,
+                  precio: (producto["precio"] ?? 0).toDouble(),
                 );
               },
             );
