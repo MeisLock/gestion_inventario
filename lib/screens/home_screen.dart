@@ -15,14 +15,14 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreen extends State<HomeScreen> {
   final FirebaseService _firebaseService = FirebaseService();
 
-// Variables para filtros
-double? _precioMin;
-double? _precioMax;
-String?_sistemaOperativo;
-bool? _enStock;
+  // 🔹 Variables para filtros
+  double? _precioMin;
+  double? _precioMax;
+  String? _sistemaOperativo;
+  bool? _enStock;
 
-// El Modal de los filtros
-void _mostrarFiltros() {
+  // 🔹 Modal de filtros
+  void _mostrarFiltros() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -43,10 +43,28 @@ void _mostrarFiltros() {
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch, // 🔹 CAMBIO: ancho consistente
                 children: [
-                  const Text("Filtros", style: TextStyle(fontSize: 18)),
+                  const Text(
+                    "Filtros",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 10),
 
-                  // 🔹 RANGO DE PRECIO 0 A 2000
+                  // 🔹 RANGO DE PRECIO con descripción y valores
+                  const Text(
+                    "Rango de precios del producto", // 🔹 CAMBIO
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(height: 5),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween, // 🔹 CAMBIO
+                    children: [
+                      Text("\$${min.toStringAsFixed(0)}"),
+                      Text("\$${max.toStringAsFixed(0)}"),
+                    ],
+                  ),
                   RangeSlider(
                     values: RangeValues(min, max),
                     min: 0,
@@ -64,31 +82,54 @@ void _mostrarFiltros() {
                     },
                   ),
 
-                  // 🔹 SISTEMA OPERATIVO
-                  DropdownButton<String>(
-                    hint: const Text("Sistema Operativo"),
-                    value: sistema,
-                    isExpanded: true,
-                    items: ["Android", "iOS"].map((e) {
-                      return DropdownMenuItem(value: e, child: Text(e));
-                    }).toList(),
-                    onChanged: (value) {
-                      setModalState(() {
-                        sistema = value;
-                      });
-                    },
+                  const SizedBox(height: 10),
+
+                  // 🔹 Sistema Operativo centrado
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade400),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: DropdownButton<String>(
+                      hint: const Text("Sistema Operativo"),
+                      value: sistema,
+                      isExpanded: true,
+                      underline: const SizedBox(),
+                      items: ["Android", "iOS"].map((e) {
+                        return DropdownMenuItem(value: e, child: Text(e));
+                      }).toList(),
+                      onChanged: (value) {
+                        setModalState(() {
+                          sistema = value;
+                        });
+                      },
+                    ),
                   ),
 
-                  // 🔹 STOCK
-                  CheckboxListTile(
-                    title: const Text("Solo disponibles"),
-                    value: stock ?? false,
-                    onChanged: (value) {
-                      setModalState(() {
-                        stock = value;
-                      });
-                    },
+                  const SizedBox(height: 10),
+
+                  // 🔹 Stock alineado al ancho
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade400),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: CheckboxListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text("Solo disponibles"),
+                      value: stock ?? false,
+                      controlAffinity: ListTileControlAffinity.leading,
+                      onChanged: (value) {
+                        setModalState(() {
+                          stock = value;
+                        });
+                      },
+                    ),
                   ),
+
+                  const SizedBox(height: 15),
 
                   ElevatedButton(
                     onPressed: () {
@@ -98,11 +139,11 @@ void _mostrarFiltros() {
                         _sistemaOperativo = sistema;
                         _enStock = stock;
                       });
-
                       Navigator.pop(context);
                     },
                     child: const Text("Aplicar filtros"),
                   ),
+                  const SizedBox(height: 10),
                 ],
               ),
             );
@@ -111,26 +152,63 @@ void _mostrarFiltros() {
       },
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(color: Colors.blue),
+              child: Text(
+                'Menú',
+                style: TextStyle(color: Colors.white, fontSize: 20),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.home),
+              title: const Text('Inicio'),
+              onTap: () => Navigator.pop(context),
+            ),
+            ListTile(
+              leading: const Icon(Icons.inventory),
+              title: const Text('Productos'),
+              onTap: () => Navigator.pop(context),
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text('Cerrar sesión'),
+              onTap: () async {
+                await FirebaseAuth.instance.signOut();
+                if (!context.mounted) return;
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) => [
           SliverAppBar(
             backgroundColor: Colors.white,
             floating: true,
             snap: true,
-            leading: IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.menu, color: Colors.black),
+            leading: Builder(
+              builder: (context) => IconButton(
+                onPressed: () => Scaffold.of(context).openDrawer(),
+                icon: const Icon(Icons.menu, color: Colors.black),
+              ),
             ),
             actions: [
               IconButton(
                 onPressed: () async {
                   await FirebaseAuth.instance.signOut();
-
                   if (!context.mounted) return;
-
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -150,12 +228,10 @@ void _mostrarFiltros() {
             centerTitle: true,
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(90),
-
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
                 child: Column(
                   children: [
-                    // Barra buscadora
                     Container(
                       height: 46,
                       decoration: BoxDecoration(
@@ -170,20 +246,14 @@ void _mostrarFiltros() {
                           ),
                           prefixIcon: Icon(Icons.search),
                           border: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(vertical: 13),
                         ),
                       ),
                     ),
-
-                    // Botones
                     Row(
                       children: [
                         const SizedBox(width: 15),
-
                         OutlinedButton.icon(
-                          onPressed:  _mostrarFiltros,
+                          onPressed: _mostrarFiltros, // 🔹 CAMBIO: ahora abre modal
                           icon: const Icon(
                             Icons.filter_list,
                             color: Color.fromARGB(255, 98, 98, 98),
@@ -192,49 +262,27 @@ void _mostrarFiltros() {
                           style: OutlinedButton.styleFrom(
                             side: BorderSide.none,
                             elevation: 3,
-                            backgroundColor: const Color.fromRGBO(
-                              247,
-                              242,
-                              250,
-                              1,
-                            ),
+                            backgroundColor:
+                                const Color.fromRGBO(247, 242, 250, 1),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            minimumSize: const Size(0, 1),
                           ),
                         ),
-
                         const SizedBox(width: 170),
-
                         OutlinedButton.icon(
                           onPressed: () {},
-                          icon: const Icon(
-                            Icons.add,
-                            color: Color.fromRGBO(8, 102, 255, 1),
-                          ),
+                          icon: const Icon(Icons.add,
+                              color: Color.fromRGBO(8, 102, 255, 1)),
                           label: const Text('Nuevo'),
                           style: OutlinedButton.styleFrom(
                             side: BorderSide.none,
                             elevation: 3,
-                            backgroundColor: const Color.fromRGBO(
-                              247,
-                              242,
-                              250,
-                              1,
-                            ),
+                            backgroundColor:
+                                const Color.fromRGBO(247, 242, 250, 1),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            minimumSize: const Size(0, 1),
                           ),
                         ),
                       ],
@@ -245,8 +293,6 @@ void _mostrarFiltros() {
             ),
           ),
         ],
-
-        //🔹 Lista de productos desde Firebase
         body: StreamBuilder<QuerySnapshot>(
           stream: _firebaseService.getProductos(),
           builder: (context, snapshot) {
@@ -261,39 +307,34 @@ void _mostrarFiltros() {
             }
 
             final productosFirebase = snapshot.data!.docs;
-              
-              // 🔹 FILTROS APLICADOS
-              final productosFiltrados = productosFirebase.where((doc) {
+
+            // 🔹 FILTROS APLICADOS CON CONTROL DE NULLS
+            final productosFiltrados = productosFirebase.where((doc) {
               final data = doc.data() as Map<String, dynamic>;
 
-              final precio = data["precio"] as double;
-              final sistema = data["sistema"] as String;
-              final stock = data["stock"] as int;
+              final precio = (data["precio"] ?? 0).toDouble(); // 🔹 CAMBIO
+              final sistema = data["sistema"] as String?;        // 🔹 CAMBIO
+              final stock = (data["stock"] ?? 0) as int;        // 🔹 CAMBIO
 
               if (_precioMin != null && precio < _precioMin!) return false;
               if (_precioMax != null && precio > _precioMax!) return false;
-
-              if (_sistemaOperativo != null &&
-                  sistema != _sistemaOperativo) return false;
-
+              if (_sistemaOperativo != null && sistema != _sistemaOperativo) return false;
               if (_enStock == true && stock <= 0) return false;
 
               return true;
             }).toList();
 
             return GridView.builder(
-              padding: EdgeInsets.all(20),
-              clipBehavior: Clip.none,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              padding: const EdgeInsets.all(20),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
               ),
-
-              itemCount: productosFiltrados.length,
+              itemCount: productosFiltrados.length, // 🔹 CAMBIO
               itemBuilder: (context, index) {
                 final producto =
-                    productosFiltrados[index].data() as Map<String, dynamic>;
+                    productosFiltrados[index].data() as Map<String, dynamic>; // 🔹 CAMBIO
                 return ProductCard(
                   nombre: producto["nombre"] as String,
                   precio: producto["precio"] as double,
