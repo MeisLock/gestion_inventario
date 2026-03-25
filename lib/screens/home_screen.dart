@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gestion_inventario/widgets/product_card.dart';
 import '../services/firebase_service.dart';
 import 'login_screen.dart';
+// Pantalla principal que muestra los productos y permite aplicar filtros
 import '../theme/theme_controller.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -15,14 +16,15 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreen extends State<HomeScreen> {
   final FirebaseService _firebaseService = FirebaseService();
+// Controladores y variables para búsqueda y filtros
+  final TextEditingController _searchController = TextEditingController();
+  String _busqueda = "";
 
-  // 🔹 Variables para filtros
   double? _precioMin;
   double? _precioMax;
   String? _sistemaOperativo;
   bool? _enStock;
-
-  // 🔹 Modal de filtros
+// Función para mostrar el modal de filtros
   void _mostrarFiltros() {
     showModalBottomSheet(
       context: context,
@@ -44,7 +46,7 @@ class _HomeScreen extends State<HomeScreen> {
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch, // 🔹 CAMBIO: ancho consistente
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const Text(
                     "Filtros",
@@ -52,15 +54,13 @@ class _HomeScreen extends State<HomeScreen> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 10),
-
-                  // 🔹 RANGO DE PRECIO con descripción y valores
                   const Text(
-                    "Rango de precios del producto", // 🔹 CAMBIO
+                    "Rango de precios del producto",
                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
                   ),
                   const SizedBox(height: 5),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween, // 🔹 CAMBIO
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text("\$${min.toStringAsFixed(0)}"),
                       Text("\$${max.toStringAsFixed(0)}"),
@@ -82,10 +82,7 @@ class _HomeScreen extends State<HomeScreen> {
                       });
                     },
                   ),
-
                   const SizedBox(height: 10),
-
-                  // 🔹 Sistema Operativo centrado
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     decoration: BoxDecoration(
@@ -97,7 +94,7 @@ class _HomeScreen extends State<HomeScreen> {
                       value: sistema,
                       isExpanded: true,
                       underline: const SizedBox(),
-                      items: ["Android", "iOS"].map((e) {
+                      items: ["Android", "IOS"].map((e) {
                         return DropdownMenuItem(value: e, child: Text(e));
                       }).toList(),
                       onChanged: (value) {
@@ -107,10 +104,7 @@ class _HomeScreen extends State<HomeScreen> {
                       },
                     ),
                   ),
-
                   const SizedBox(height: 10),
-
-                  // 🔹 Stock alineado al ancho
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     decoration: BoxDecoration(
@@ -129,9 +123,7 @@ class _HomeScreen extends State<HomeScreen> {
                       },
                     ),
                   ),
-
                   const SizedBox(height: 15),
-
                   ElevatedButton(
                     onPressed: () {
                       setState(() {
@@ -154,6 +146,16 @@ class _HomeScreen extends State<HomeScreen> {
     );
   }
 
+  void _nuevoProducto() {
+    showDialog(
+      context: context,
+      builder: (_) => const AlertDialog(
+        title: Text("Nuevo producto"),
+        content: Text("Aquí irá el formulario"),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -161,6 +163,44 @@ class _HomeScreen extends State<HomeScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(color: Colors.blue),
+              child: Text(
+                'Menú',
+                style: TextStyle(color: Colors.white, fontSize: 20),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.home),
+              title: const Text('Inicio'),
+              onTap: () => Navigator.pop(context),
+            ),
+            ListTile(
+              leading: const Icon(Icons.inventory),
+              title: const Text('Productos'),
+              onTap: () => Navigator.pop(context),
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text('Cerrar sesión'),
+              onTap: () async {
+                await FirebaseAuth.instance.signOut();
+                if (!context.mounted) {
+                  return;
+                }
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
       backgroundColor: colorScheme.surface,
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) => [
@@ -191,7 +231,9 @@ class _HomeScreen extends State<HomeScreen> {
               IconButton(
                 onPressed: () async {
                   await FirebaseAuth.instance.signOut();
-                  if (!context.mounted) return;
+                  if (!context.mounted) {
+                    return;
+                  }
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -224,16 +266,31 @@ class _HomeScreen extends State<HomeScreen> {
                         borderRadius: BorderRadius.circular(30),
                       ),
                       child: TextField(
+                        controller: _searchController,
+                        onChanged: (value) {
+                          setState(() {
+                            _busqueda = value.toLowerCase();
+                          });
+                        },
                         decoration: InputDecoration(
                           hintText: 'Buscar producto...',
                           hintStyle: TextStyle(
                             color: colorScheme.onSurfaceVariant,
                           ),
                           prefixIcon: Icon(
-                            Icons.search,
-                            color: colorScheme.onSurfaceVariant,
-                          ),
+                              Icons.search,
+                             color: colorScheme.onSurfaceVariant,
+                                           ),
                           border: InputBorder.none,
+                          suffixIcon: IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() {
+                                _busqueda = "";
+                              });
+                            },
+                          ),
                         ),
                       ),
                     ),
@@ -241,9 +298,8 @@ class _HomeScreen extends State<HomeScreen> {
                       children: [
                         const SizedBox(width: 15),
                         OutlinedButton.icon(
-                          onPressed: () {},
-                          //Icono del filtro
-                          icon: Icon(
+                          onPressed: _mostrarFiltros,
+                          icon: const Icon(
                             Icons.filter_list,
                             color: colorScheme.onSurfaceVariant,
                           ),
@@ -265,14 +321,15 @@ class _HomeScreen extends State<HomeScreen> {
                         ),
                         const SizedBox(width: 170),
                         OutlinedButton.icon(
-                          onPressed: () {},
-                          //Icono del nuevo producto
-                          icon: Icon(Icons.add, color: colorScheme.primary),
-                          //Texto del nuevo producto
+                          onPressed: _nuevoProducto,
+                         icon: Icon(
+    Icons.add,
+    color: colorScheme.primary,
+  ),
                           label: Text(
-                            'Nuevo',
-                            style: TextStyle(color: colorScheme.onSurface),
-                          ),
+    'Nuevo',
+    style: TextStyle(color: colorScheme.onSurface),
+  )
                           style: OutlinedButton.styleFrom(
                             side: BorderSide.none,
                             elevation: 3,
@@ -307,18 +364,45 @@ class _HomeScreen extends State<HomeScreen> {
 
             final productosFirebase = snapshot.data!.docs;
 
-            // 🔹 FILTROS APLICADOS CON CONTROL DE NULLS
             final productosFiltrados = productosFirebase.where((doc) {
               final data = doc.data() as Map<String, dynamic>;
 
-              final precio = (data["precio"] ?? 0).toDouble(); // 🔹 CAMBIO
-              final sistema = data["sistema"] as String?;        // 🔹 CAMBIO
-              final stock = (data["stock"] ?? 0) as int;        // 🔹 CAMBIO
+              final nombre =
+                  (data["nombre"] ?? "").toString().toLowerCase();
+              final precio = (data["precio"] ?? 0).toDouble();
+              final stock = (data["stock"] ?? 0) as int;
 
-              if (_precioMin != null && precio < _precioMin!) return false;
-              if (_precioMax != null && precio > _precioMax!) return false;
-              if (_sistemaOperativo != null && sistema != _sistemaOperativo) return false;
-              if (_enStock == true && stock <= 0) return false;
+              final sistema = ((data["sistema"] ??
+                          data["sistemaOperativo"] ??
+                          data["SO"] ??
+                          "")
+                      .toString())
+                  .trim()
+                  .toUpperCase();
+              final filtroSistema = _sistemaOperativo?.trim().toUpperCase();
+
+              if (_busqueda.isNotEmpty &&
+                  !nombre.contains(_busqueda)) {
+                return false;
+              }
+
+              if (_precioMin != null && precio < _precioMin!) {
+                return false;
+              }
+
+              if (_precioMax != null && precio > _precioMax!) {
+                return false;
+              }
+
+              if (filtroSistema != null && filtroSistema.isNotEmpty) {
+                if (sistema != filtroSistema) {
+                  return false;
+                }
+              }
+
+              if (_enStock == true && stock <= 0) {
+                return false;
+              }
 
               return true;
             }).toList();
@@ -330,13 +414,14 @@ class _HomeScreen extends State<HomeScreen> {
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
               ),
-              itemCount: productosFiltrados.length, // 🔹 CAMBIO
+              itemCount: productosFiltrados.length,
               itemBuilder: (context, index) {
                 final producto =
-                    productosFiltrados[index].data() as Map<String, dynamic>; // 🔹 CAMBIO
+                    productosFiltrados[index].data() as Map<String, dynamic>;
+
                 return ProductCard(
                   nombre: producto["nombre"] as String,
-                  precio: producto["precio"] as double,
+                  precio: (producto["precio"] ?? 0).toDouble(),
                 );
               },
             );
