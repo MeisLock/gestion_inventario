@@ -16,7 +16,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreen extends State<HomeScreen> {
   final FirebaseService _firebaseService = FirebaseService();
-// Controladores y variables para búsqueda y filtros
+
+  // Controladores y variables para búsqueda y filtros
   final TextEditingController _searchController = TextEditingController();
   String _busqueda = "";
 
@@ -24,7 +25,8 @@ class _HomeScreen extends State<HomeScreen> {
   double? _precioMax;
   String? _sistemaOperativo;
   bool? _enStock;
-// Función para mostrar el modal de filtros
+
+  // Función para mostrar el modal de filtros
   void _mostrarFiltros() {
     showModalBottomSheet(
       context: context,
@@ -210,7 +212,12 @@ class _HomeScreen extends State<HomeScreen> {
             iconTheme: IconThemeData(color: colorScheme.onSurface),
             floating: true,
             snap: true,
-            leading: IconButton(onPressed: () {}, icon: const Icon(Icons.menu)),
+            leading: Builder(
+              builder: (context) => IconButton(
+                onPressed: () => Scaffold.of(context).openDrawer(),
+                icon: const Icon(Icons.menu),
+              ),
+            ),
             actions: [
               ValueListenableBuilder<ThemeMode>(
                 valueListenable: ThemeController.themeMode,
@@ -227,7 +234,6 @@ class _HomeScreen extends State<HomeScreen> {
                   );
                 },
               ),
-
               IconButton(
                 onPressed: () async {
                   await FirebaseAuth.instance.signOut();
@@ -278,9 +284,9 @@ class _HomeScreen extends State<HomeScreen> {
                             color: colorScheme.onSurfaceVariant,
                           ),
                           prefixIcon: Icon(
-                              Icons.search,
-                             color: colorScheme.onSurfaceVariant,
-                                           ),
+                            Icons.search,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
                           border: InputBorder.none,
                           suffixIcon: IconButton(
                             icon: const Icon(Icons.clear),
@@ -299,11 +305,10 @@ class _HomeScreen extends State<HomeScreen> {
                         const SizedBox(width: 15),
                         OutlinedButton.icon(
                           onPressed: _mostrarFiltros,
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.filter_list,
                             color: colorScheme.onSurfaceVariant,
                           ),
-                          //Texto del filtro
                           label: Text(
                             'Filtro',
                             style: TextStyle(color: colorScheme.onSurface),
@@ -322,14 +327,14 @@ class _HomeScreen extends State<HomeScreen> {
                         const SizedBox(width: 170),
                         OutlinedButton.icon(
                           onPressed: _nuevoProducto,
-                         icon: Icon(
-    Icons.add,
-    color: colorScheme.primary,
-  ),
+                          icon: Icon(
+                            Icons.add,
+                            color: colorScheme.primary,
+                          ),
                           label: Text(
-    'Nuevo',
-    style: TextStyle(color: colorScheme.onSurface),
-  )
+                            'Nuevo',
+                            style: TextStyle(color: colorScheme.onSurface),
+                          ),
                           style: OutlinedButton.styleFrom(
                             side: BorderSide.none,
                             elevation: 3,
@@ -379,7 +384,8 @@ class _HomeScreen extends State<HomeScreen> {
                       .toString())
                   .trim()
                   .toUpperCase();
-              final filtroSistema = _sistemaOperativo?.trim().toUpperCase();
+              final filtroSistema =
+                  _sistemaOperativo?.trim().toUpperCase();
 
               if (_busqueda.isNotEmpty &&
                   !nombre.contains(_busqueda)) {
@@ -394,7 +400,8 @@ class _HomeScreen extends State<HomeScreen> {
                 return false;
               }
 
-              if (filtroSistema != null && filtroSistema.isNotEmpty) {
+              if (filtroSistema != null &&
+                  filtroSistema.isNotEmpty) {
                 if (sistema != filtroSistema) {
                   return false;
                 }
