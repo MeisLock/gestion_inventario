@@ -4,28 +4,25 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gestion_inventario/widgets/product_card.dart';
 import '../services/firebase_service.dart';
 import 'login_screen.dart';
-
+// Pantalla principal que muestra los productos y permite aplicar filtros
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreen();
 }
-// Pantalla principal con buscador, filtros y listado de productos
+
 class _HomeScreen extends State<HomeScreen> {
   final FirebaseService _firebaseService = FirebaseService();
-
-  // Buscador
+// Controladores y variables para búsqueda y filtros
   final TextEditingController _searchController = TextEditingController();
   String _busqueda = "";
 
-  // Variables para filtros
   double? _precioMin;
   double? _precioMax;
   String? _sistemaOperativo;
   bool? _enStock;
-
-  // Modal de los filtros 
+// Función para mostrar el modal de filtros
   void _mostrarFiltros() {
     showModalBottomSheet(
       context: context,
@@ -55,7 +52,6 @@ class _HomeScreen extends State<HomeScreen> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 10),
-
                   const Text(
                     "Rango de precios del producto",
                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
@@ -85,7 +81,6 @@ class _HomeScreen extends State<HomeScreen> {
                     },
                   ),
                   const SizedBox(height: 10),
-
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     decoration: BoxDecoration(
@@ -108,7 +103,6 @@ class _HomeScreen extends State<HomeScreen> {
                     ),
                   ),
                   const SizedBox(height: 10),
-
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     decoration: BoxDecoration(
@@ -128,7 +122,6 @@ class _HomeScreen extends State<HomeScreen> {
                     ),
                   ),
                   const SizedBox(height: 15),
-
                   ElevatedButton(
                     onPressed: () {
                       setState(() {
@@ -151,7 +144,6 @@ class _HomeScreen extends State<HomeScreen> {
     );
   }
 
-  // Modal de nuevo producto 
   void _nuevoProducto() {
     showDialog(
       context: context,
@@ -191,7 +183,9 @@ class _HomeScreen extends State<HomeScreen> {
               title: const Text('Cerrar sesión'),
               onTap: () async {
                 await FirebaseAuth.instance.signOut();
-                if (!context.mounted) return;
+                if (!context.mounted) {
+                  return;
+                }
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -217,7 +211,9 @@ class _HomeScreen extends State<HomeScreen> {
               IconButton(
                 onPressed: () async {
                   await FirebaseAuth.instance.signOut();
-                  if (!context.mounted) return;
+                  if (!context.mounted) {
+                    return;
+                  }
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -248,7 +244,7 @@ class _HomeScreen extends State<HomeScreen> {
                         borderRadius: BorderRadius.circular(30),
                       ),
                       child: TextField(
-                        controller: _searchController, // 🔍 añadido
+                        controller: _searchController,
                         onChanged: (value) {
                           setState(() {
                             _busqueda = value.toLowerCase();
@@ -295,7 +291,7 @@ class _HomeScreen extends State<HomeScreen> {
                         ),
                         const SizedBox(width: 170),
                         OutlinedButton.icon(
-                          onPressed: _nuevoProducto, // ➕ añadido
+                          onPressed: _nuevoProducto,
                           icon: const Icon(Icons.add,
                               color: Color.fromRGBO(8, 102, 255, 1)),
                           label: const Text('Nuevo'),
@@ -336,7 +332,7 @@ class _HomeScreen extends State<HomeScreen> {
               final data = doc.data() as Map<String, dynamic>;
 
               final nombre =
-                  (data["nombre"] ?? "").toString().toLowerCase(); // 🔍 añadido
+                  (data["nombre"] ?? "").toString().toLowerCase();
               final precio = (data["precio"] ?? 0).toDouble();
               final stock = (data["stock"] ?? 0) as int;
 
@@ -349,18 +345,28 @@ class _HomeScreen extends State<HomeScreen> {
                   .toUpperCase();
               final filtroSistema = _sistemaOperativo?.trim().toUpperCase();
 
-              // EL filtro de  búsqueda
               if (_busqueda.isNotEmpty &&
-                  !nombre.contains(_busqueda)) return false;
-
-              if (_precioMin != null && precio < _precioMin!) return false;
-              if (_precioMax != null && precio > _precioMax!) return false;
-
-              if (filtroSistema != null && filtroSistema.isNotEmpty) {
-                if (sistema != filtroSistema) return false;
+                  !nombre.contains(_busqueda)) {
+                return false;
               }
 
-              if (_enStock == true && stock <= 0) return false;
+              if (_precioMin != null && precio < _precioMin!) {
+                return false;
+              }
+
+              if (_precioMax != null && precio > _precioMax!) {
+                return false;
+              }
+
+              if (filtroSistema != null && filtroSistema.isNotEmpty) {
+                if (sistema != filtroSistema) {
+                  return false;
+                }
+              }
+
+              if (_enStock == true && stock <= 0) {
+                return false;
+              }
 
               return true;
             }).toList();
@@ -379,7 +385,7 @@ class _HomeScreen extends State<HomeScreen> {
 
                 return ProductCard(
                   nombre: producto["nombre"] as String,
-                  precio: (producto["precio"] ?? 0).toDouble(), // fix
+                  precio: (producto["precio"] ?? 0).toDouble(),
                 );
               },
             );
