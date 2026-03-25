@@ -151,6 +151,16 @@ class _HomeScreen extends State<HomeScreen> {
     );
   }
 
+  void _nuevoProducto() {
+    showDialog(
+      context: context,
+      builder: (_) => const AlertDialog(
+        title: Text("Nuevo producto"),
+        content: Text("Aquí irá el formulario"),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme; 
@@ -183,6 +193,21 @@ class _HomeScreen extends State<HomeScreen> {
                 ),
               ),  
             actions: [
+              ValueListenableBuilder<ThemeMode>(
+                valueListenable: ThemeController.themeMode,
+                builder: (context, themeMode, _) {
+                  return IconButton(
+                    onPressed: () {
+                      ThemeController.toggleTheme();
+                    },
+                    icon: Icon(
+                      themeMode == ThemeMode.light
+                          ? Icons.dark_mode
+                          : Icons.light_mode,
+                    ),
+                  );
+                },
+              ),
               IconButton(
                 onPressed: () => mostrarDialogoCerrarSesion(context),// 🔹 Creado un Dialog para confirmar el cerrar seseión
                 icon: Icon(Icons.logout, color: colorScheme.onSurface), 
@@ -219,6 +244,15 @@ class _HomeScreen extends State<HomeScreen> {
                           ),
                           prefixIcon: Icon(Icons.search, color: colorScheme.onSurface), 
                           border: InputBorder.none,
+                          suffixIcon: IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() {
+                                _busqueda = "";
+                              });
+                            },
+                          ),
                         ),
                       ),
                     ),
@@ -283,10 +317,20 @@ class _HomeScreen extends State<HomeScreen> {
               final sistema = data["sistema"] as String?;
               final stock = (data["stock"] ?? 0) as int;
 
-              if (_precioMin != null && precio < _precioMin!) return false;
-              if (_precioMax != null && precio > _precioMax!) return false;
-              if (_sistemaOperativo != null && sistema != _sistemaOperativo) return false;
-              if (_enStock == true && stock <= 0) return false;
+              if (_precioMax != null && precio > _precioMax!) {
+                return false;
+              }
+
+              if (filtroSistema != null &&
+                  filtroSistema.isNotEmpty) {
+                if (sistema != filtroSistema) {
+                  return false;
+                }
+              }
+
+              if (_enStock == true && stock <= 0) {
+                return false;
+              }
 
               return true;
             }).toList();
@@ -303,7 +347,7 @@ class _HomeScreen extends State<HomeScreen> {
                 final producto = productosFiltrados[index].data() as Map<String, dynamic>;
                 return ProductCard(
                   nombre: producto["nombre"] as String,
-                  precio: producto["precio"] as double,
+                  precio: (producto["precio"] ?? 0).toDouble(),
                 );
               },
             );
