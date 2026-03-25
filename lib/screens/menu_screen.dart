@@ -1,7 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:gestion_inventario/providers/theme_provider.dart';
-import 'package:provider/provider.dart';
+import 'package:gestion_inventario/theme/theme_controller.dart';
 
 class MenuScreenWidget extends StatefulWidget {
   const MenuScreenWidget({super.key});
@@ -13,9 +12,8 @@ class MenuScreenWidget extends StatefulWidget {
 class _MenuScreenStateWidget extends State<MenuScreenWidget> {
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
     final colorScheme = Theme.of(context).colorScheme;
-
+    final isDark = ThemeController.themeMode.value == ThemeMode.dark;
     return Material(
       color: Colors.transparent,
       child: Stack(
@@ -75,13 +73,18 @@ class _MenuScreenStateWidget extends State<MenuScreenWidget> {
                               ),
                             ),
                             const Spacer(),
-                            Icon( themeProvider.isDarkMode ? Icons.nightlight_round : Icons.wb_sunny_outlined,
+                            Icon(
+                              isDark
+                                  ? Icons.nightlight_round
+                                  : Icons.wb_sunny_outlined,
                               color: colorScheme.onSurface,
                             ),
                             Switch(
-                              value: themeProvider.isDarkMode,
+                              value: isDark,
                               onChanged: (value) {
-                                themeProvider.cambioDeTema();
+                                setState(() {
+                                  ThemeController.toggleTheme();
+                                });
                               },
                             ),
                             const SizedBox(width: 20),
