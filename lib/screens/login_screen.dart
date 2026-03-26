@@ -17,6 +17,9 @@ class _LoginScreen extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  //  variable para controlar la visibilidad de la contraseña con bool y un IconButton en el TextField
+  bool _obscurePassword = true;
+
   Future<void> _login() async {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
@@ -29,12 +32,20 @@ class _LoginScreen extends State<LoginScreen> {
     }
 
     try {
-      await _auth.signInWithEmailAndPassword(email: email, password: password);
+      await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      if (!mounted) return;
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const HomeScreen()),
       );
     } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(e.message ?? 'Error al iniciar sesión')),
       );
@@ -46,13 +57,15 @@ class _LoginScreen extends State<LoginScreen> {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
       if (googleUser == null) return;
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
       await _auth.signInWithCredential(credential);
+
       if (!mounted) return;
 
       Navigator.pushReplacement(
@@ -60,10 +73,14 @@ class _LoginScreen extends State<LoginScreen> {
         MaterialPageRoute(builder: (_) => const HomeScreen()),
       );
     } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error de Firebase: ${e.message}')),
       );
     } catch (e) {
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error con Google: $e')),
       );
@@ -79,7 +96,7 @@ class _LoginScreen extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme; 
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       body: SafeArea(
@@ -95,7 +112,7 @@ class _LoginScreen extends State<LoginScreen> {
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w800,
-                  color: colorScheme.onSurface, 
+                  color: colorScheme.onSurface,
                 ),
               ),
 
@@ -106,7 +123,7 @@ class _LoginScreen extends State<LoginScreen> {
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: colorScheme.onSurface.withValues(alpha: 0.5), 
+                  color: colorScheme.onSurface.withValues(alpha: 0.5),
                 ),
               ),
 
@@ -120,7 +137,7 @@ class _LoginScreen extends State<LoginScreen> {
                 decoration: InputDecoration(
                   hintText: 'email@domain.com',
                   hintStyle: TextStyle(
-                    color: colorScheme.onSurface.withValues(alpha: 0.4), 
+                    color: colorScheme.onSurface.withValues(alpha: 0.4),
                     fontSize: 15,
                   ),
                   border: OutlineInputBorder(
@@ -132,18 +149,33 @@ class _LoginScreen extends State<LoginScreen> {
               const SizedBox(height: 16),
 
               buildLabel('Contraseña', colorScheme),
+
+              // Aquí añadimos el TextField para la contraseña con el IconButton para mostrar/ocultar la contraseña
               TextField(
                 controller: _passwordController,
-                obscureText: true,
+                obscureText: _obscurePassword,
                 textAlign: TextAlign.left,
                 decoration: InputDecoration(
                   hintText: 'Password',
                   hintStyle: TextStyle(
-                    color: colorScheme.onSurface.withValues(alpha: 0.4), 
+                    color: colorScheme.onSurface.withValues(alpha: 0.4),
                     fontSize: 15,
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
+                  ),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                      color: colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
                   ),
                 ),
               ),
@@ -156,8 +188,8 @@ class _LoginScreen extends State<LoginScreen> {
                 child: ElevatedButton(
                   onPressed: _login,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: colorScheme.onSurface, 
-                    foregroundColor: colorScheme.surface, 
+                    backgroundColor: colorScheme.onSurface,
+                    foregroundColor: colorScheme.surface,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -184,8 +216,9 @@ class _LoginScreen extends State<LoginScreen> {
                   decorationColor: Color(0xFF3B82F6),
                 ),
               ),
+
               const SizedBox(height: 20),
-              // 🔹 Añadimos esta interfaz para seguir el Wireframe 
+
               Row(
                 children: [
                   Expanded(child: Divider(color: Colors.grey.withValues(alpha: .5))),
@@ -199,16 +232,18 @@ class _LoginScreen extends State<LoginScreen> {
                   Expanded(child: Divider(color: Colors.grey.withValues(alpha: .5))),
                 ],
               ),
+
               const SizedBox(height: 20),
+
               SizedBox(
                 width: 350,
                 height: 54,
                 child: OutlinedButton(
                   onPressed: _signInWithGoogle,
                   style: OutlinedButton.styleFrom(
-                    backgroundColor: colorScheme.surfaceContainerHighest, 
+                    backgroundColor: colorScheme.surfaceContainerHighest,
                     side: BorderSide(
-                      color: colorScheme.outline, 
+                      color: colorScheme.outline,
                       width: 1.5,
                     ),
                     shape: RoundedRectangleBorder(
@@ -229,7 +264,7 @@ class _LoginScreen extends State<LoginScreen> {
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
-                          color: colorScheme.onSurface, 
+                          color: colorScheme.onSurface,
                         ),
                       ),
                     ],
@@ -263,5 +298,4 @@ class _LoginScreen extends State<LoginScreen> {
       ),
     );
   }
-// 🔹 Movemos el método BuildLabel a un fichero aparte para poder utilizarlo en otros archivos  
 }
