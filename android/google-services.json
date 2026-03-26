@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "472816789709",
+    "firebase_url": "https://prueba-1-14b94-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "prueba-1-14b94",
+    "storage_bucket": "prueba-1-14b94.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:472816789709:android:48fd484e345fa1997fe184",
+        "android_client_info": {
+          "package_name": "com.example.gestion_inventario"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAi2y1LTx6DFMvK9zqVKSTgdOeh9a772vA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
