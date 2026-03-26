@@ -32,10 +32,7 @@ class _LoginScreen extends State<LoginScreen> {
     }
 
     try {
-      await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+      await _auth.signInWithEmailAndPassword(email: email, password: password);
 
       if (!mounted) return;
 
@@ -49,6 +46,49 @@ class _LoginScreen extends State<LoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(e.message ?? 'Error al iniciar sesión')),
       );
+    }
+  }
+
+  Future<void> _recuperarContrasena() async {
+    final String email = _emailController.text.trim();
+
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Escribe tu correo para recuperar la contraseña'),
+        ),
+      );
+      return;
+    }
+
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Se ha enviado un correo para restablecer la contraseña',
+          ),
+        ),
+      );
+    } on FirebaseAuthException catch (e) {
+      String mensaje = 'No se pudo enviar el correo de recuperación';
+
+      if (e.code == 'invalid-email') {
+        mensaje = 'El correo no es válido';
+      } else if (e.code == 'user-not-found') {
+        mensaje = 'No existe ninguna cuenta con ese correo';
+      } else if (e.code == 'too-many-requests') {
+        mensaje = 'Demasiados intentos. Inténtalo más tarde';
+      }
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(mensaje)));
     }
   }
 
@@ -81,9 +121,9 @@ class _LoginScreen extends State<LoginScreen> {
     } catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error con Google: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error con Google: $e')));
     }
   }
 
@@ -149,6 +189,7 @@ class _LoginScreen extends State<LoginScreen> {
               const SizedBox(height: 16),
 
               buildLabel('Contraseña', colorScheme),
+              const SizedBox(height: 8),
 
               // Aquí añadimos el TextField para la contraseña con el IconButton para mostrar/ocultar la contraseña
               TextField(
@@ -180,6 +221,25 @@ class _LoginScreen extends State<LoginScreen> {
                 ),
               ),
 
+              const SizedBox(height: 8),
+
+              Align(
+                alignment: Alignment.centerLeft,
+                child: GestureDetector(
+                  onTap: _recuperarContrasena,
+                  child: const Text(
+                    '¿Has olvidado la contraseña?',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF3B82F6),
+                      decoration: TextDecoration.underline,
+                      decorationColor: Color(0xFF3B82F6),
+                    ),
+                  ),
+                ),
+              ),
+
               const SizedBox(height: 20),
 
               SizedBox(
@@ -196,32 +256,16 @@ class _LoginScreen extends State<LoginScreen> {
                   ),
                   child: const Text(
                     'Login',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                   ),
                 ),
               ),
 
-              const SizedBox(height: 20),
-
-              const Text(
-                '¿Has olvidado la contraseña?',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF3B82F6),
-                  decoration: TextDecoration.underline,
-                  decorationColor: Color(0xFF3B82F6),
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
               Row(
                 children: [
-                  Expanded(child: Divider(color: Colors.grey.withValues(alpha: .5))),
+                  Expanded(
+                    child: Divider(color: Colors.grey.withValues(alpha: .5)),
+                  ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 10),
                     child: Text(
@@ -229,7 +273,9 @@ class _LoginScreen extends State<LoginScreen> {
                       style: TextStyle(color: colorScheme.onSurface),
                     ),
                   ),
-                  Expanded(child: Divider(color: Colors.grey.withValues(alpha: .5))),
+                  Expanded(
+                    child: Divider(color: Colors.grey.withValues(alpha: .5)),
+                  ),
                 ],
               ),
 
@@ -242,10 +288,7 @@ class _LoginScreen extends State<LoginScreen> {
                   onPressed: _signInWithGoogle,
                   style: OutlinedButton.styleFrom(
                     backgroundColor: colorScheme.surfaceContainerHighest,
-                    side: BorderSide(
-                      color: colorScheme.outline,
-                      width: 1.5,
-                    ),
+                    side: BorderSide(color: colorScheme.outline, width: 1.5),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
