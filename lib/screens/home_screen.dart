@@ -270,16 +270,13 @@ class _HomeScreen extends State<HomeScreen> {
                         ),
                         const SizedBox(width: 140),
                         OutlinedButton.icon(
-                          onPressed: () => mostrarDialogoConfirmacion(context, 
-                                  titulo: 'Añadir Producto', 
-                                  mensaje: '¿Quieres añadir un producto?', 
-                                  onAceptar: () { 
-                                    Navigator.pushReplacement(
-                                      context, 
-                                      MaterialPageRoute(builder: (_) => AddScreen())
-                                    );
-                                   }
-                                  ),
+                          onPressed: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (_) => AddScreen()),
+                              );
+                              },
+
                           icon: Icon(
                             Icons.add,
                             color: colorScheme.primary,

@@ -15,7 +15,7 @@ class FirebaseService {
   }
 
   // 🔹 Guardar un producto en Firestore
-  Future<void> addProducto({
+  Future<void> addProduct({
     required String nombre,
     required String descripcion,
     required String sistemaOperativo,
@@ -37,4 +37,37 @@ class FirebaseService {
   Stream<QuerySnapshot> getProductos() {
     return _firestore.collection('Productos').snapshots();
   }
+
+  // Actulizar el stock de un producto
+  Future<void> updateProduct({
+    required String id,
+    required String nombre,
+    required String descripcion,
+    required String sistemaOperativo,
+    required int stock,
+    required double precio,
+    required String imageUrl,
+
+  }) async {
+
+    await _firestore.collection('Productos').doc(id).update({
+      'nombre': nombre,
+      'descripcion': descripcion,
+      'sistemaOperativo': sistemaOperativo,
+      'stock': stock,
+      'precio': precio,
+      'imageUrl': imageUrl,
+    });
+  }
+
+  // Eliminar un producto
+  Future<void> deleteProduct(String id) async {
+    await _firestore.collection('Productos').doc(id).delete();
+
+  }
+
+
+
+
+  
 }

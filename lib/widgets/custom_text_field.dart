@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 // 🔹 Widget personalizado para construir TextFields
 
@@ -8,6 +9,7 @@ class CustomTextField extends StatelessWidget {
   final TextEditingController? controller;
   final TextInputType? keyboardType;
   final Widget? suffixIcon;
+  final List<TextInputFormatter>? inputFormatters;
 
   const CustomTextField({
     super.key,
@@ -16,6 +18,7 @@ class CustomTextField extends StatelessWidget {
     this.controller,
     this.keyboardType,
     this.suffixIcon,
+    this.inputFormatters,
   });
 
   @override
@@ -26,6 +29,7 @@ class CustomTextField extends StatelessWidget {
       controller: controller,
       maxLines: maxLines,
       keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
       textAlign: TextAlign.left,
       decoration: InputDecoration(
         hintText: hintText,
