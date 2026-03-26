@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-// 🔹 Cambios para que los colores de los textos cambien segun el tema de aplicación
+//  Cambios para que los colores de los textos cambien segun el tema de aplicación
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -17,6 +17,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
       TextEditingController();
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  // Los ojos para mostrar/ocultar la contraseña en ambos TextField
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
   Future<void> _register() async {
     String email = _emailController.text.trim();
@@ -84,7 +88,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
-  // 🔹 Adaptado al colorScheme del tema
+  //  Adaptado al colorScheme del tema
   Widget _buildLabel(String text, ColorScheme colorScheme) {
     return Align(
       alignment: Alignment.centerLeft,
@@ -93,7 +97,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w600,
-          color: colorScheme.onSurface, 
+          color: colorScheme.onSurface,
         ),
       ),
     );
@@ -106,10 +110,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: colorScheme.surface, 
+        backgroundColor: colorScheme.surface,
         title: Text(
           'Registro',
-          style: TextStyle(color: colorScheme.onSurface), 
+          style: TextStyle(color: colorScheme.onSurface),
         ),
         centerTitle: true,
       ),
@@ -127,7 +131,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 decoration: InputDecoration(
                   hintText: 'email@domain.com',
                   hintStyle: TextStyle(
-                    color: colorScheme.onSurface.withValues(alpha: 0.6), // 🔹 Adaptado
+                    color: colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -144,9 +148,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
               _buildLabel('Contraseña', colorScheme),
               const SizedBox(height: 8),
+
+              // 
               TextField(
                 controller: _passwordController,
-                obscureText: true,
+                obscureText: _obscurePassword,
                 decoration: InputDecoration(
                   hintText: 'Contraseña',
                   hintStyle: TextStyle(
@@ -160,6 +166,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     borderRadius: BorderRadius.circular(10),
                     borderSide: BorderSide(color: colorScheme.primary, width: 1.9),
                   ),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
+                  ),
                 ),
               ),
 
@@ -167,9 +185,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
               _buildLabel('Confirmar contraseña', colorScheme),
               const SizedBox(height: 8),
+
+              // TextField para confirmar contraseña con el mismo estilo y el IconButton para mostrar/ocultar la contraseña
               TextField(
                 controller: _confirmPasswordController,
-                obscureText: true,
+                obscureText: _obscureConfirmPassword,
                 decoration: InputDecoration(
                   hintText: 'Repite la contraseña',
                   hintStyle: TextStyle(
@@ -182,6 +202,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                     borderSide: BorderSide(color: colorScheme.primary, width: 1.9),
+                  ),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscureConfirmPassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscureConfirmPassword =
+                            !_obscureConfirmPassword;
+                      });
+                    },
                   ),
                 ),
               ),
