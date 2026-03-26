@@ -3,10 +3,11 @@ import 'dart:io';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:gestion_inventario/screens/home_screen.dart';
-import 'package:gestion_inventario/services/firebase_service.dart';
+import 'package:gestion_inventario/screens/home/home_screen.dart';
+import 'package:gestion_inventario/screens/profile_screen.dart';
+import 'package:gestion_inventario/services/firebase/firebase_service.dart';
 import 'package:gestion_inventario/services/select_image.dart';
-import 'package:gestion_inventario/services/upload_image.dart';
+import 'package:gestion_inventario/services/firebase/upload_image.dart';
 import 'package:gestion_inventario/widgets/build_label.dart';
 import 'package:gestion_inventario/widgets/custom_text_field.dart';
 
@@ -183,7 +184,10 @@ Future<void> _saveProduct() async {
         actions: [
           IconButton(
             onPressed:() {
-              
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => ProfileScreen()) 
+              );
             }, 
             icon:   Icon(Icons.account_circle_outlined)
           ),
