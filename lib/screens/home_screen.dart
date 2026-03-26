@@ -166,30 +166,33 @@ class _HomeScreen extends State<HomeScreen> {
             iconTheme: IconThemeData(color: colorScheme.onSurface),
             floating: true,
             snap: true,
-            leading: Padding(// 🔹 Añadir un Padding para poder poner margenes para centrar el Icono
-              padding: const EdgeInsets.only(left: 20), 
-              child:
-              IconButton(
+            leading: Padding(
+              // 🔹 Añadir un Padding para poder poner margenes para centrar el Icono
+              padding: const EdgeInsets.only(left: 20),
+              child: IconButton(
                 onPressed: () {
-                  showGeneralDialog( // 🔹 Creado un Dialog para el submenu de opciones
-                      context: context,
-                      barrierLabel: 'menu',
-                      barrierDismissible: true,
-                      barrierColor: Colors.transparent,
-                      pageBuilder: (context, animation, secondaryAnimation) {
-                        return const MenuScreenWidget();
-                      },
-                    );
+                  showGeneralDialog(
+                    // 🔹 Creado un Dialog para el submenu de opciones
+                    context: context,
+                    barrierLabel: 'menu',
+                    barrierDismissible: true,
+                    barrierColor: Colors.transparent,
+                    pageBuilder: (context, animation, secondaryAnimation) {
+                      return const MenuScreenWidget();
+                    },
+                  );
                 },
                 icon: const Icon(Icons.menu),
               ),
             ),
             actions: [
               IconButton(
-                onPressed: () => mostrarDialogoCerrarSesion(context), // 🔹 Agregamos el metodo para el AlertDialog para cerrar sesión
+                onPressed: () => mostrarDialogoCerrarSesion(
+                  context,
+                ), // 🔹 Agregamos el metodo para el AlertDialog para cerrar sesión
                 icon: const Icon(Icons.logout),
               ),
-              const SizedBox(width: 14,)//🔹 Modificación para centrarlo más
+              const SizedBox(width: 14), //🔹 Modificación para centrarlo más
             ],
             title: Text(
               'Menu',
@@ -270,20 +273,18 @@ class _HomeScreen extends State<HomeScreen> {
                         ),
                         const SizedBox(width: 140),
                         OutlinedButton.icon(
-                          onPressed: () => mostrarDialogoConfirmacion(context, 
-                                  titulo: 'Añadir Producto', 
-                                  mensaje: '¿Quieres añadir un producto?', 
-                                  onAceptar: () { 
-                                    Navigator.pushReplacement(
-                                      context, 
-                                      MaterialPageRoute(builder: (_) => AddScreen())
-                                    );
-                                   }
-                                  ),
-                          icon: Icon(
-                            Icons.add,
-                            color: colorScheme.primary,
+                          onPressed: () => mostrarDialogoConfirmacion(
+                            context,
+                            titulo: 'Añadir Producto',
+                            mensaje: '¿Quieres añadir un producto?',
+                            onAceptar: () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(builder: (_) => AddScreen()),
+                              );
+                            },
                           ),
+                          icon: Icon(Icons.add, color: colorScheme.primary),
                           label: Text(
                             'Nuevo',
                             style: TextStyle(color: colorScheme.onSurface),
@@ -325,23 +326,21 @@ class _HomeScreen extends State<HomeScreen> {
             final productosFiltrados = productosFirebase.where((doc) {
               final data = doc.data() as Map<String, dynamic>;
 
-              final nombre =
-                  (data["nombre"] ?? "").toString().toLowerCase();
+              final nombre = (data["nombre"] ?? "").toString().toLowerCase();
               final precio = (data["precio"] ?? 0).toDouble();
               final stock = (data["stock"] ?? 0) as int;
 
-              final sistema = ((data["sistema"] ??
-                          data["sistemaOperativo"] ??
-                          data["SO"] ??
-                          "")
-                      .toString())
-                  .trim()
-                  .toUpperCase();
-              final filtroSistema =
-                  _sistemaOperativo?.trim().toUpperCase();
+              final sistema =
+                  ((data["sistema"] ??
+                              data["sistemaOperativo"] ??
+                              data["SO"] ??
+                              "")
+                          .toString())
+                      .trim()
+                      .toUpperCase();
+              final filtroSistema = _sistemaOperativo?.trim().toUpperCase();
 
-              if (_busqueda.isNotEmpty &&
-                  !nombre.contains(_busqueda)) {
+              if (_busqueda.isNotEmpty && !nombre.contains(_busqueda)) {
                 return false;
               }
 
@@ -353,8 +352,7 @@ class _HomeScreen extends State<HomeScreen> {
                 return false;
               }
 
-              if (filtroSistema != null &&
-                  filtroSistema.isNotEmpty) {
+              if (filtroSistema != null && filtroSistema.isNotEmpty) {
                 if (sistema != filtroSistema) {
                   return false;
                 }
@@ -373,7 +371,7 @@ class _HomeScreen extends State<HomeScreen> {
                 right: 20,
                 bottom: 20,
                 top: 8, // 🔹 Elimina el espacio superior entre los dos bodies
-                ),
+              ),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 mainAxisSpacing: 12,
