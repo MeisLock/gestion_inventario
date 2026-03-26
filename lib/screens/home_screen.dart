@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gestion_inventario/screens/add_screen.dart';
@@ -26,6 +27,7 @@ class _HomeScreen extends State<HomeScreen> {
   String? _sistemaOperativo;
   bool? _enStock;
 
+  // Función para mostrar el modal de filtros
   void _mostrarFiltros() {
     showModalBottomSheet(
       context: context,
@@ -266,7 +268,7 @@ class _HomeScreen extends State<HomeScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 140),// 🔹 Ajuste al centrado entre botones
+                        const SizedBox(width: 170),
                         OutlinedButton.icon(
                           onPressed: () => mostrarDialogoConfirmacion(context, 
                                   titulo: 'Añadir Producto', 
