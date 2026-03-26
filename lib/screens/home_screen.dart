@@ -268,7 +268,7 @@ class _HomeScreen extends State<HomeScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 170),
+                        const SizedBox(width: 140),
                         OutlinedButton.icon(
                           onPressed: () => mostrarDialogoConfirmacion(context, 
                                   titulo: 'Añadir Producto', 
