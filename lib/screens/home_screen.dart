@@ -162,6 +162,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final String nombre = (producto["nombre"] ?? "Sin nombre").toString();
     final double precio = (producto["precio"] ?? 0).toDouble();
+    final String imageUrl = (producto["imageUrl"] ?? "no url");
 
     return Card(
       elevation: 3,
@@ -181,12 +182,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       topRight: Radius.circular(14),
                     ),
                   ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.image_outlined,
-                      size: 42,
-                      color: Color(0xFF9DB2CE),
-                    ),
+                  child:  Center(
+                    child: Image.network(imageUrl),
                   ),
                 ),
                 Positioned(

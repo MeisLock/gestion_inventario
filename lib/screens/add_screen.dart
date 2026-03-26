@@ -2,7 +2,9 @@ import 'dart:io';
 
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:gestion_inventario/screens/home_screen.dart';
+import 'package:gestion_inventario/services/firebase_service.dart';
 import 'package:gestion_inventario/services/select_image.dart';
 import 'package:gestion_inventario/services/upload_image.dart';
 import 'package:gestion_inventario/widgets/build_label.dart';
@@ -18,7 +20,7 @@ class AddScreen extends StatefulWidget{
 class _AddScreenState extends State<AddScreen>{
   String? _sistemaOperativo;
   int _stock = 0;
-  File? imagen_to_upload;
+  File? imagenToUpload;
 
 //Servicio con Firebase
   final FirebaseService _firebaseService = FirebaseService();
@@ -43,6 +45,8 @@ Future<void> _saveProduct() async {
   final nombre = _nombreController.text.trim();
   final descripcion = _descripcionController.text.trim();
   final precioTexto = _precioController.text.trim();
+  
+            
 
   // Validación básica
   if (nombre.isEmpty || descripcion.isEmpty || precioTexto.isEmpty) {
@@ -72,6 +76,16 @@ Future<void> _saveProduct() async {
     );
     return;
   }
+   if (imagenToUpload == null){
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('añade una imagen'),
+      ),
+    );
+    return;
+  }
+   await uploadImage(imagenToUpload!); //sube la imagen a firestorage
+
 
   // Confirmación
   final confirmar = await showDialog<bool>(
@@ -107,7 +121,7 @@ Future<void> _saveProduct() async {
       sistemaOperativo: _sistemaOperativo!,
       stock: _stock,
       precio: precio,
-      imageUrl: '',
+      imageUrl: imageUrl,
     );
 
     if (!mounted) return;
@@ -342,12 +356,13 @@ Future<void> _saveProduct() async {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                              imagen_to_upload != null ? Image.file(imagen_to_upload!) :
+                              imagenToUpload != null ? Image.file(imagenToUpload!) :
                               OutlinedButton.icon(
                                 onPressed:() async{
                                   final imagen =await getImage();
+                                  if(imagen == null) return;
                                   setState(() {
-                                    imagen_to_upload = File(imagen!.path);
+                                    imagenToUpload = File(imagen.path);
                                   });
                                 }, 
                                 label: Text('Imagen'),

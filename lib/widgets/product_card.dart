@@ -3,10 +3,11 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class ProductCard extends StatelessWidget {
-  const ProductCard({super.key, required this.nombre, required this.precio});
+  const ProductCard({super.key, required this.nombre, required this.precio, required this.imageUrl});
 
   final String nombre;
   final double precio;
+  final String imageUrl;
 
   @override
   Widget build(BuildContext context) {
