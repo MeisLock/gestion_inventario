@@ -417,7 +417,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
               final nombre = (data["nombre"] ?? "").toString().toLowerCase();
               final precio = (data["precio"] ?? 0).toDouble();
-              final int stock = (data["stock"] ?? 0); // Agregado el campo stock para el filtro de disponibilidad
+              final stock = (data["stock"] ?? 0) as int;
+
               final sistema =
                   ((data["sistema"] ??
                               data["sistemaOperativo"] ??
