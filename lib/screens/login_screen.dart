@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:gestion_inventario/widgets/build_label.dart';
 import 'home_screen.dart';
 import 'register_screen.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -183,9 +184,22 @@ class _LoginScreen extends State<LoginScreen> {
                   decorationColor: Color(0xFF3B82F6),
                 ),
               ),
-
               const SizedBox(height: 20),
-
+              // 🔹 Añadimos esta interfaz para seguir el Wireframe 
+              Row(
+                children: [
+                  Expanded(child: Divider(color: Colors.grey.withValues(alpha: .5))),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: Text(
+                      'o continue con',
+                      style: TextStyle(color: colorScheme.onSurface),
+                    ),
+                  ),
+                  Expanded(child: Divider(color: Colors.grey.withValues(alpha: .5))),
+                ],
+              ),
+              const SizedBox(height: 20),
               SizedBox(
                 width: 350,
                 height: 54,
@@ -249,18 +263,5 @@ class _LoginScreen extends State<LoginScreen> {
       ),
     );
   }
-
-  Widget buildLabel(String text, ColorScheme colorScheme) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w700,
-          color: colorScheme.onSurface, 
-        ),
-      ),
-    );
-  }
+// 🔹 Movemos el método BuildLabel a un fichero aparte para poder utilizarlo en otros archivos  
 }

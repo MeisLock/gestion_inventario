@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:gestion_inventario/screens/add_screen.dart';
 import 'package:gestion_inventario/screens/menu_screen.dart';
+import 'package:gestion_inventario/widgets/dialog_confirmacion.dart';
 import 'package:gestion_inventario/widgets/dialog_cerrar_sesion.dart';
 import 'package:gestion_inventario/widgets/product_card.dart';
 import '../services/firebase_service.dart';
+// 🔹 Removemos los imports que no se usan
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,6 +17,9 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreen extends State<HomeScreen> {
   final FirebaseService _firebaseService = FirebaseService();
+
+  final TextEditingController _searchController = TextEditingController();
+  String _busqueda = "";
 
   double? _precioMin;
   double? _precioMax;
@@ -32,8 +38,6 @@ class _HomeScreen extends State<HomeScreen> {
 
         return StatefulBuilder(
           builder: (context, setModalState) {
-            final colorScheme = Theme.of(context).colorScheme; 
-
             return Padding(
               padding: EdgeInsets.only(
                 bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -45,30 +49,22 @@ class _HomeScreen extends State<HomeScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
+                  const Text(
                     "Filtros",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: colorScheme.onSurface, 
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 10),
-                  Text(
+                  const Text(
                     "Rango de precios del producto",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: colorScheme.onSurface, 
-                    ),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
                   ),
                   const SizedBox(height: 5),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text("\$${min.toStringAsFixed(0)}", style: TextStyle(color: colorScheme.onSurface)), 
-                      Text("\$${max.toStringAsFixed(0)}", style: TextStyle(color: colorScheme.onSurface)), 
+                      Text("\$${min.toStringAsFixed(0)}"),
+                      Text("\$${max.toStringAsFixed(0)}"),
                     ],
                   ),
                   RangeSlider(
@@ -91,23 +87,21 @@ class _HomeScreen extends State<HomeScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     decoration: BoxDecoration(
-                      border: Border.all(color: colorScheme.outline), 
+                      border: Border.all(color: Colors.grey.shade400),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: DropdownButton<String>(
-                      hint: Text("Sistema Operativo", style: TextStyle(color: colorScheme.onSurface)),
+                      hint: const Text("Sistema Operativo"),
                       value: sistema,
                       isExpanded: true,
                       underline: const SizedBox(),
-                      dropdownColor: colorScheme.surface, 
-                      items: ["Android", "iOS"].map((e) {
-                        return DropdownMenuItem(
-                          value: e,
-                          child: Text(e, style: TextStyle(color: colorScheme.onSurface)),
-                        );
+                      items: ["Android", "IOS"].map((e) {
+                        return DropdownMenuItem(value: e, child: Text(e));
                       }).toList(),
                       onChanged: (value) {
-                        setModalState(() => sistema = value);
+                        setModalState(() {
+                          sistema = value;
+                        });
                       },
                     ),
                   ),
@@ -115,16 +109,18 @@ class _HomeScreen extends State<HomeScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     decoration: BoxDecoration(
-                      border: Border.all(color: colorScheme.outline), 
+                      border: Border.all(color: Colors.grey.shade400),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: CheckboxListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: Text("Solo disponibles", style: TextStyle(color: colorScheme.onSurface)), 
+                      title: const Text("Solo disponibles"),
                       value: stock ?? false,
                       controlAffinity: ListTileControlAffinity.leading,
                       onChanged: (value) {
-                        setModalState(() => stock = value);
+                        setModalState(() {
+                          stock = value;
+                        });
                       },
                     ),
                   ),
@@ -151,35 +147,29 @@ class _HomeScreen extends State<HomeScreen> {
     );
   }
 
-  void _nuevoProducto() {
-    showDialog(
-      context: context,
-      builder: (_) => const AlertDialog(
-        title: Text("Nuevo producto"),
-        content: Text("Aquí irá el formulario"),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme; 
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
+      // 🔹 Movemos el ListView a la pantalla de menu_screen
+      backgroundColor: colorScheme.surface,
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) => [
           SliverAppBar(
-            backgroundColor: colorScheme.surface, 
+            backgroundColor: colorScheme.surface,
+            surfaceTintColor: Colors.transparent,
+            iconTheme: IconThemeData(color: colorScheme.onSurface),
             floating: true,
             snap: true,
-            leading: 
-              Padding(
-                // 🔹 Añadir un Padding para poder poner margenes para centrar el Icono
-                padding: const EdgeInsets.only(left: 20), 
-                child: 
-                IconButton(
-                  onPressed: () {// 🔹 Creado un Dialog para el submenu de opciones con el switch para el cambio de tema
-                    showGeneralDialog(
+            leading: Padding(// 🔹 Añadir un Padding para poder poner margenes para centrar el Icono
+              padding: const EdgeInsets.only(left: 20), 
+              child:
+              IconButton(
+                onPressed: () {
+                  showGeneralDialog( // 🔹 Creado un Dialog para el submenu de opciones
                       context: context,
                       barrierLabel: 'menu',
                       barrierDismissible: true,
@@ -188,38 +178,23 @@ class _HomeScreen extends State<HomeScreen> {
                         return const MenuScreenWidget();
                       },
                     );
-                  },
-                  icon: Icon(Icons.menu, color: colorScheme.onSurface), 
-                ),
-              ),  
-            actions: [
-              ValueListenableBuilder<ThemeMode>(
-                valueListenable: ThemeController.themeMode,
-                builder: (context, themeMode, _) {
-                  return IconButton(
-                    onPressed: () {
-                      ThemeController.toggleTheme();
-                    },
-                    icon: Icon(
-                      themeMode == ThemeMode.light
-                          ? Icons.dark_mode
-                          : Icons.light_mode,
-                    ),
-                  );
                 },
+                icon: const Icon(Icons.menu),
               ),
+            ),
+            actions: [
               IconButton(
-                onPressed: () => mostrarDialogoCerrarSesion(context),// 🔹 Creado un Dialog para confirmar el cerrar seseión
-                icon: Icon(Icons.logout, color: colorScheme.onSurface), 
+                onPressed: () => mostrarDialogoCerrarSesion(context), // 🔹 Agregamos el metodo para el AlertDialog para cerrar sesión
+                icon: const Icon(Icons.logout),
               ),
-              const SizedBox(width: 14,)//🔹 Modificación para centralo más
+              const SizedBox(width: 14,)//🔹 Modificación para centrarlo más
             ],
             title: Text(
               'Menu',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w400,
-                color: colorScheme.onSurface, 
+                color: colorScheme.onSurface,
               ),
             ),
             centerTitle: true,
@@ -231,18 +206,29 @@ class _HomeScreen extends State<HomeScreen> {
                   children: [
                     Container(
                       height: 46,
-                      width: 350,// 🔹 Modificación al tamaño de la barra buscadora
+                      width: 350,
                       decoration: BoxDecoration(
-                        color: colorScheme.surfaceContainerHighest, 
+                        color: isDark
+                            ? const Color(0xFF1E1E1E)
+                            : const Color(0xFFF3F4F6),
                         borderRadius: BorderRadius.circular(30),
                       ),
                       child: TextField(
+                        controller: _searchController,
+                        onChanged: (value) {
+                          setState(() {
+                            _busqueda = value.toLowerCase();
+                          });
+                        },
                         decoration: InputDecoration(
                           hintText: 'Buscar producto...',
                           hintStyle: TextStyle(
-                            color: colorScheme.onSurface.withValues(alpha: 0.4), 
+                            color: colorScheme.onSurfaceVariant,
                           ),
-                          prefixIcon: Icon(Icons.search, color: colorScheme.onSurface), 
+                          prefixIcon: Icon(
+                            Icons.search,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
                           border: InputBorder.none,
                           suffixIcon: IconButton(
                             icon: const Icon(Icons.clear),
@@ -256,18 +242,25 @@ class _HomeScreen extends State<HomeScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 6,),
                     Row(
                       children: [
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 15),
                         OutlinedButton.icon(
                           onPressed: _mostrarFiltros,
-                          icon: Icon(Icons.filter_list, color: colorScheme.onSurface), 
-                          label: Text('Filtro', style: TextStyle(color: colorScheme.onSurface)), 
+                          icon: Icon(
+                            Icons.filter_list,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                          label: Text(
+                            'Filtro',
+                            style: TextStyle(color: colorScheme.onSurface),
+                          ),
                           style: OutlinedButton.styleFrom(
                             side: BorderSide.none,
                             elevation: 3,
-                            backgroundColor: colorScheme.surfaceContainerHighest, 
+                            backgroundColor: isDark
+                                ? const Color(0xFF1E1E1E)
+                                : const Color.fromRGBO(247, 242, 250, 1),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
@@ -275,14 +268,30 @@ class _HomeScreen extends State<HomeScreen> {
                         ),
                         const SizedBox(width: 140),// 🔹 Ajuste al centrado entre botones
                         OutlinedButton.icon(
-                          onPressed: () {},
-                          icon: const Icon(Icons.add, color: Color.fromRGBO(8, 102, 255, 1)),
-                          label: Text('Nuevo', style: TextStyle(color: colorScheme.onSurface)), 
+                          onPressed: () => mostrarDialogoConfirmacion(context, 
+                                  titulo: 'Añadir Producto', 
+                                  mensaje: '¿Quieres añadir un producto?', 
+                                  onAceptar: () { 
+                                    Navigator.pushReplacement(
+                                      context, 
+                                      MaterialPageRoute(builder: (_) => AddScreen())
+                                    );
+                                   }
+                                  ),
+                          icon: Icon(
+                            Icons.add,
+                            color: colorScheme.primary,
+                          ),
+                          label: Text(
+                            'Nuevo',
+                            style: TextStyle(color: colorScheme.onSurface),
+                          ),
                           style: OutlinedButton.styleFrom(
-                            minimumSize: const Size(0, 40),//🔹Modificación del tamaño del Icono Nuevo
                             side: BorderSide.none,
                             elevation: 3,
-                            backgroundColor: colorScheme.surfaceContainerHighest, 
+                            backgroundColor: isDark
+                                ? const Color(0xFF1E1E1E)
+                                : const Color.fromRGBO(247, 242, 250, 1),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
@@ -303,19 +312,40 @@ class _HomeScreen extends State<HomeScreen> {
               return const Center(child: CircularProgressIndicator());
             }
             if (snapshot.hasError) {
-              return Center(child: Text('Error al cargar productos', style: TextStyle(color: colorScheme.onSurface))); 
+              return const Center(child: Text('Error al cargar productos'));
             }
             if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-              return Center(child: Text('No hay productos', style: TextStyle(color: colorScheme.onSurface))); 
+              return const Center(child: Text('No hay productos'));
             }
 
             final productosFirebase = snapshot.data!.docs;
 
             final productosFiltrados = productosFirebase.where((doc) {
               final data = doc.data() as Map<String, dynamic>;
+
+              final nombre =
+                  (data["nombre"] ?? "").toString().toLowerCase();
               final precio = (data["precio"] ?? 0).toDouble();
-              final sistema = data["sistema"] as String?;
               final stock = (data["stock"] ?? 0) as int;
+
+              final sistema = ((data["sistema"] ??
+                          data["sistemaOperativo"] ??
+                          data["SO"] ??
+                          "")
+                      .toString())
+                  .trim()
+                  .toUpperCase();
+              final filtroSistema =
+                  _sistemaOperativo?.trim().toUpperCase();
+
+              if (_busqueda.isNotEmpty &&
+                  !nombre.contains(_busqueda)) {
+                return false;
+              }
+
+              if (_precioMin != null && precio < _precioMin!) {
+                return false;
+              }
 
               if (_precioMax != null && precio > _precioMax!) {
                 return false;
@@ -336,7 +366,12 @@ class _HomeScreen extends State<HomeScreen> {
             }).toList();
 
             return GridView.builder(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.only(
+                left: 20,
+                right: 20,
+                bottom: 20,
+                top: 8, // 🔹 Elimina el espacio superior entre los dos bodies
+                ),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 mainAxisSpacing: 12,
@@ -344,7 +379,9 @@ class _HomeScreen extends State<HomeScreen> {
               ),
               itemCount: productosFiltrados.length,
               itemBuilder: (context, index) {
-                final producto = productosFiltrados[index].data() as Map<String, dynamic>;
+                final producto =
+                    productosFiltrados[index].data() as Map<String, dynamic>;
+
                 return ProductCard(
                   nombre: producto["nombre"] as String,
                   precio: (producto["precio"] ?? 0).toDouble(),
