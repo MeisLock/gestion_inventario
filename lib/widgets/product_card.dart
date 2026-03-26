@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 class ProductCard extends StatelessWidget {
@@ -33,16 +35,12 @@ class ProductCard extends StatelessWidget {
             child: Container(
               width: 350,
               decoration: BoxDecoration(
-                color: isDark
-                    ? const Color(0xFF2A2A2A)
-                    : const Color.fromARGB(255, 220, 234, 245),
+                color:  const Color.fromARGB(255, 234, 241, 253), // 🔹 El color de la imagen simepre el mismo aunque esten en modo obscuro
                 borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
               ),
               child: Icon(
                 Icons.image_outlined,
-                color: isDark
-                    ? Colors.white70
-                    : const Color.fromARGB(255, 147, 197, 216),
+                color:  const Color.fromARGB(255, 151, 191, 243), // 🔹 El color de la imagen simepre el mismo aunque esten en modo obscuro
                 size: 40,
               ),
             ),
