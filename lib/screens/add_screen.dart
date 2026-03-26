@@ -1,6 +1,8 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:gestion_inventario/screens/home_screen.dart';
+import 'package:gestion_inventario/services/firebase_service.dart';
+import 'package:flutter/services.dart';
 import 'package:gestion_inventario/widgets/build_label.dart';
 import 'package:gestion_inventario/widgets/custom_text_field.dart';
 
@@ -14,6 +16,128 @@ class AddScreen extends StatefulWidget{
 class _AddScreenState extends State<AddScreen>{
   String? _sistemaOperativo;
   int _stock = 0;
+
+//Servicio con Firebase
+  final FirebaseService _firebaseService = FirebaseService();
+
+//Leer campos de texto que ha escrito el usuario
+  final TextEditingController _nombreController = TextEditingController();
+  final TextEditingController _descripcionController = TextEditingController();
+  final TextEditingController _precioController = TextEditingController();
+
+  bool _isLoading = false;
+
+//Eliminacion de recursos 
+  @override
+  void dispose() {
+    _nombreController.dispose();
+    _descripcionController.dispose();
+    _precioController.dispose();
+    super.dispose();
+  }
+
+Future<void> _saveProduct() async {
+  final nombre = _nombreController.text.trim();
+  final descripcion = _descripcionController.text.trim();
+  final precioTexto = _precioController.text.trim();
+
+  // Validación básica
+  if (nombre.isEmpty || descripcion.isEmpty || precioTexto.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Completa todos los campos'),
+      ),
+    );
+    return;
+  }
+
+  if (_sistemaOperativo == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Selecciona un sistema operativo'),
+      ),
+    );
+    return;
+  }
+
+  final precio = double.tryParse(precioTexto);
+  if (precio == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Precio inválido'),
+      ),
+    );
+    return;
+  }
+
+  // Confirmación
+  final confirmar = await showDialog<bool>(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: const Text('Añadir producto'),
+        content: const Text('¿Quieres añadir este producto?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Añadir'),
+          ),
+        ],
+      );
+    },
+  );
+
+  if (confirmar != true) return;
+
+  setState(() {
+    _isLoading = true;
+  });
+
+  try {
+    await _firebaseService.addProduct(
+      nombre: nombre,
+      descripcion: descripcion,
+      sistemaOperativo: _sistemaOperativo!,
+      stock: _stock,
+      precio: precio,
+      imageUrl: '',
+    );
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Producto añadido correctamente'),
+      ),
+    );
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const HomeScreen()),
+    );
+
+  } catch (e) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Error: $e'),
+      ),
+    );
+  } finally {
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+}
+
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -52,7 +176,7 @@ class _AddScreenState extends State<AddScreen>{
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(20),
         child: ElevatedButton.icon(
-          onPressed: () {},
+          onPressed: _isLoading ? null : _saveProduct,
           icon: Icon(Icons.check, color: colorScheme.onPrimary),
           label: Text(
             'Añadir',
@@ -84,11 +208,18 @@ class _AddScreenState extends State<AddScreen>{
                   children: [
                     buildLabel('Nombre del producto', colorScheme),
                     const SizedBox(height: 8),
-                    CustomTextField(hintText: 'Nombre del producto'),
+                    CustomTextField(
+                      hintText: 'Nombre del producto',
+                      controller: _nombreController,
+                    ),
                     const SectionDivider(),
                     buildLabel('Descripción del producto', colorScheme),
                     const SizedBox(height: 8),
-                    CustomTextField(hintText: 'Descripción', maxLines: 4,),
+                    CustomTextField(
+                      hintText: 'Descripción', 
+                      maxLines: 4,
+                      controller: _descripcionController,
+                    ),
                     const SectionDivider(),
                     buildLabel('Sistema Operativo', colorScheme),
                     const SizedBox(height: 8),
@@ -186,8 +317,13 @@ class _AddScreenState extends State<AddScreen>{
                     buildLabel('Precio del producto', colorScheme),
                     const SizedBox(height: 8),
                     CustomTextField(
-                      hintText: '', 
-                      suffixIcon: Icon(Icons.euro_symbol),
+                      hintText: 'Precio',
+                      controller: _precioController,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      suffixIcon: const Icon(Icons.euro_symbol),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+                      ],
                     ),
                     const SizedBox(height: 15),
                     SizedBox(

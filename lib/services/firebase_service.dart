@@ -14,8 +14,8 @@ class FirebaseService {
     return await ref.getDownloadURL();
   }
 
-  //Guardar un producto en Firestore
-  Future<void> addProducto({
+  // 🔹 Guardar un producto en Firestore
+  Future<void> addProduct({
     required String nombre,
     required String descripcion,
     required String sistemaOperativo,
@@ -64,7 +64,9 @@ class FirebaseService {
     required int stock,
     required double precio,
     required String imageUrl,
+
   }) async {
+
     await _firestore.collection('Productos').doc(id).update({
       'nombre': nombre,
       'descripcion': descripcion,
