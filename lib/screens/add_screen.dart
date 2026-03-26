@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:gestion_inventario/screens/home_screen.dart';
+import 'package:gestion_inventario/services/select_image.dart';
+import 'package:gestion_inventario/services/upload_image.dart';
 import 'package:gestion_inventario/widgets/build_label.dart';
 import 'package:gestion_inventario/widgets/custom_text_field.dart';
 
@@ -14,6 +18,7 @@ class AddScreen extends StatefulWidget{
 class _AddScreenState extends State<AddScreen>{
   String? _sistemaOperativo;
   int _stock = 0;
+  File? imagen_to_upload;
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -52,7 +57,12 @@ class _AddScreenState extends State<AddScreen>{
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(20),
         child: ElevatedButton.icon(
-          onPressed: () {},
+          onPressed: () async {
+              if (imagen_to_upload == null){
+                return;
+              }
+              final uploaded = await uploadImage(imagen_to_upload!);
+            }, 
           icon: Icon(Icons.check, color: colorScheme.onPrimary),
           label: Text(
             'Añadir',
@@ -202,9 +212,15 @@ class _AddScreenState extends State<AddScreen>{
                         child: Center(
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
+                          children: [
+                              imagen_to_upload != null ? Image.file(imagen_to_upload!) :
                               OutlinedButton.icon(
-                                onPressed:() {}, 
+                                onPressed:() async{
+                                  final imagen =await getImage();
+                                  setState(() {
+                                    imagen_to_upload = File(imagen!.path);
+                                  });
+                                }, 
                                 label: Text('Imagen'),
                                 icon: Icon(Icons.add_a_photo_outlined),
                                 style: OutlinedButton.styleFrom(
