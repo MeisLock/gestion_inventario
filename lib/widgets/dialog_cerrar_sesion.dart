@@ -2,8 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gestion_inventario/screens/login_screen.dart';
 
-//Dialog para confirmar el cierre de sesión
-
 Future<void> mostrarDialogoCerrarSesion(BuildContext context) async{
   final eleccion = await showDialog<bool>(
     context: context, 

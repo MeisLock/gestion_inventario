@@ -1,11 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:gestion_inventario/screens/add_screen.dart';
+import 'package:gestion_inventario/screens/menu_screen.dart';
+import 'package:gestion_inventario/widgets/dialog_confirmacion.dart';
+import 'package:gestion_inventario/widgets/dialog_cerrar_sesion.dart';
 import 'package:gestion_inventario/widgets/product_card.dart';
 import '../services/firebase_service.dart';
-import 'login_screen.dart';
-// Pantalla principal que muestra los productos y permite aplicar filtros
-import '../theme/theme_controller.dart';
+// 🔹 Removemos los imports que no se usan
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,7 +19,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreen extends State<HomeScreen> {
   final FirebaseService _firebaseService = FirebaseService();
 
-  // Controladores y variables para búsqueda y filtros
   final TextEditingController _searchController = TextEditingController();
   String _busqueda = "";
 
@@ -148,16 +149,6 @@ class _HomeScreen extends State<HomeScreen> {
     );
   }
 
-  void _nuevoProducto() {
-    showDialog(
-      context: context,
-      builder: (_) => const AlertDialog(
-        title: Text("Nuevo producto"),
-        content: Text("Aquí irá el formulario"),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -165,44 +156,7 @@ class _HomeScreen extends State<HomeScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(color: Colors.blue),
-              child: Text(
-                'Menú',
-                style: TextStyle(color: Colors.white, fontSize: 20),
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.home),
-              title: const Text('Inicio'),
-              onTap: () => Navigator.pop(context),
-            ),
-            ListTile(
-              leading: const Icon(Icons.inventory),
-              title: const Text('Productos'),
-              onTap: () => Navigator.pop(context),
-            ),
-            ListTile(
-              leading: const Icon(Icons.logout),
-              title: const Text('Cerrar sesión'),
-              onTap: () async {
-                await FirebaseAuth.instance.signOut();
-                if (!context.mounted) {
-                  return;
-                }
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (_) => const LoginScreen()),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
+      // 🔹 Movemos el ListView a la pantalla de menu_screen
       backgroundColor: colorScheme.surface,
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) => [
@@ -212,41 +166,30 @@ class _HomeScreen extends State<HomeScreen> {
             iconTheme: IconThemeData(color: colorScheme.onSurface),
             floating: true,
             snap: true,
-            leading: Builder(
-              builder: (context) => IconButton(
-                onPressed: () => Scaffold.of(context).openDrawer(),
+            leading: Padding(// 🔹 Añadir un Padding para poder poner margenes para centrar el Icono
+              padding: const EdgeInsets.only(left: 20), 
+              child:
+              IconButton(
+                onPressed: () {
+                  showGeneralDialog( // 🔹 Creado un Dialog para el submenu de opciones
+                      context: context,
+                      barrierLabel: 'menu',
+                      barrierDismissible: true,
+                      barrierColor: Colors.transparent,
+                      pageBuilder: (context, animation, secondaryAnimation) {
+                        return const MenuScreenWidget();
+                      },
+                    );
+                },
                 icon: const Icon(Icons.menu),
               ),
             ),
             actions: [
-              ValueListenableBuilder<ThemeMode>(
-                valueListenable: ThemeController.themeMode,
-                builder: (context, themeMode, _) {
-                  return IconButton(
-                    onPressed: () {
-                      ThemeController.toggleTheme();
-                    },
-                    icon: Icon(
-                      themeMode == ThemeMode.light
-                          ? Icons.dark_mode
-                          : Icons.light_mode,
-                    ),
-                  );
-                },
-              ),
               IconButton(
-                onPressed: () async {
-                  await FirebaseAuth.instance.signOut();
-                  if (!context.mounted) {
-                    return;
-                  }
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => const LoginScreen()),
-                  );
-                },
+                onPressed: () => mostrarDialogoCerrarSesion(context), // 🔹 Agregamos el metodo para el AlertDialog para cerrar sesión
                 icon: const Icon(Icons.logout),
               ),
+              const SizedBox(width: 14,)//🔹 Modificación para centrarlo más
             ],
             title: Text(
               'Menu',
@@ -265,6 +208,7 @@ class _HomeScreen extends State<HomeScreen> {
                   children: [
                     Container(
                       height: 46,
+                      width: 350,
                       decoration: BoxDecoration(
                         color: isDark
                             ? const Color(0xFF1E1E1E)
@@ -326,7 +270,16 @@ class _HomeScreen extends State<HomeScreen> {
                         ),
                         const SizedBox(width: 170),
                         OutlinedButton.icon(
-                          onPressed: _nuevoProducto,
+                          onPressed: () => mostrarDialogoConfirmacion(context, 
+                                  titulo: 'Añadir Producto', 
+                                  mensaje: '¿Quieres añadir un producto?', 
+                                  onAceptar: () { 
+                                    Navigator.pushReplacement(
+                                      context, 
+                                      MaterialPageRoute(builder: (_) => AddScreen())
+                                    );
+                                   }
+                                  ),
                           icon: Icon(
                             Icons.add,
                             color: colorScheme.primary,
@@ -415,7 +368,12 @@ class _HomeScreen extends State<HomeScreen> {
             }).toList();
 
             return GridView.builder(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.only(
+                left: 20,
+                right: 20,
+                bottom: 20,
+                top: 8, // 🔹 Elimina el espacio superior entre los dos bodies
+                ),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 mainAxisSpacing: 12,

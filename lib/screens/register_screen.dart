@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+// 🔹 Cambios para que los colores de los textos cambien segun el tema de aplicación
+
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -68,9 +70,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
         mensaje = 'La contraseña es demasiado débil';
       }
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(mensaje)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(mensaje)),
+      );
     }
   }
 
@@ -82,15 +84,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
-  Widget buildLabel(String text) {
+  // 🔹 Adaptado al colorScheme del tema
+  Widget _buildLabel(String text, ColorScheme colorScheme) {
     return Align(
       alignment: Alignment.centerLeft,
       child: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w600,
-          color: Colors.black,
+          color: colorScheme.onSurface, 
         ),
       ),
     );
@@ -98,8 +101,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Registro'), centerTitle: true),
+      backgroundColor: colorScheme.surface,
+      appBar: AppBar(
+        backgroundColor: colorScheme.surface, 
+        title: Text(
+          'Registro',
+          style: TextStyle(color: colorScheme.onSurface), 
+        ),
+        centerTitle: true,
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 28.0),
@@ -107,44 +120,68 @@ class _RegisterScreenState extends State<RegisterScreen> {
             children: [
               const SizedBox(height: 30),
 
-              buildLabel('Correo electrónico'),
+              _buildLabel('Correo electrónico', colorScheme),
               const SizedBox(height: 8),
               TextField(
                 controller: _emailController,
                 decoration: InputDecoration(
                   hintText: 'email@domain.com',
-                  border: OutlineInputBorder(
+                  hintStyle: TextStyle(
+                    color: colorScheme.onSurface.withValues(alpha: 0.6), // 🔹 Adaptado
+                  ),
+                  enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: colorScheme.onSurface, width: 1.9),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: colorScheme.primary, width: 1.9),
                   ),
                 ),
               ),
 
               const SizedBox(height: 16),
 
-              buildLabel('Contraseña'),
+              _buildLabel('Contraseña', colorScheme),
               const SizedBox(height: 8),
               TextField(
                 controller: _passwordController,
                 obscureText: true,
                 decoration: InputDecoration(
                   hintText: 'Contraseña',
-                  border: OutlineInputBorder(
+                  hintStyle: TextStyle(
+                    color: colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
+                  enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: colorScheme.onSurface, width: 1.9),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: colorScheme.primary, width: 1.9),
                   ),
                 ),
               ),
 
               const SizedBox(height: 16),
 
-              buildLabel('Confirmar contraseña'),
+              _buildLabel('Confirmar contraseña', colorScheme),
               const SizedBox(height: 8),
               TextField(
                 controller: _confirmPasswordController,
                 obscureText: true,
                 decoration: InputDecoration(
                   hintText: 'Repite la contraseña',
-                  border: OutlineInputBorder(
+                  hintStyle: TextStyle(
+                    color: colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
+                  enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: colorScheme.onSurface, width: 1.9),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: colorScheme.primary, width: 1.9),
                   ),
                 ),
               ),
@@ -157,17 +194,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: ElevatedButton(
                   onPressed: _register,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
+                    backgroundColor: colorScheme.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Registrarse',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                      color: colorScheme.onPrimary,
                     ),
                   ),
                 ),
