@@ -254,10 +254,12 @@ class _HomeScreenState extends State<HomeScreen> {
             floating: true,
             snap: true,
             leading: Padding(
+              // 🔹 Añadir un Padding para poder poner margenes para centrar el Icono
               padding: const EdgeInsets.only(left: 20),
               child: IconButton(
                 onPressed: () {
                   showGeneralDialog(
+                    // 🔹 Creado un Dialog para el submenu de opciones
                     context: context,
                     barrierLabel: 'menu',
                     barrierDismissible: true,
@@ -272,10 +274,12 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             actions: [
               IconButton(
-                onPressed: () => mostrarDialogoCerrarSesion(context),
+                onPressed: () => mostrarDialogoCerrarSesion(
+                  context,
+                ), // 🔹 Agregamos el metodo para el AlertDialog para cerrar sesión
                 icon: const Icon(Icons.logout),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 14), //🔹 Modificación para centrarlo más
             ],
             title: Text(
               'Menu',
@@ -363,9 +367,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             onAceptar: () {
                               Navigator.pushReplacement(
                                 context,
-                                MaterialPageRoute(
-                                  builder: (_) => const AddScreen(),
-                                ),
+                                MaterialPageRoute(builder: (_) => AddScreen()),
                               );
                             },
                           ),
@@ -414,22 +416,16 @@ class _HomeScreenState extends State<HomeScreen> {
               final data = doc.data() as Map<String, dynamic>;
 
               final nombre = (data["nombre"] ?? "").toString().toLowerCase();
-
               final precio = (data["precio"] ?? 0).toDouble();
 
-              final stock = (data["stock"] ?? 0) is int
-                  ? (data["stock"] ?? 0) as int
-                  : int.tryParse((data["stock"] ?? "0").toString()) ?? 0;
-
               final sistema =
-                  (data["sistema"] ??
-                          data["sistemaOperativo"] ??
-                          data["SO"] ??
-                          "")
-                      .toString()
+                  ((data["sistema"] ??
+                              data["sistemaOperativo"] ??
+                              data["SO"] ??
+                              "")
+                          .toString())
                       .trim()
                       .toUpperCase();
-
               final filtroSistema = _sistemaOperativo?.trim().toUpperCase();
 
               if (_busqueda.isNotEmpty && !nombre.contains(_busqueda)) {
@@ -468,7 +464,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 left: 20,
                 right: 20,
                 bottom: 20,
-                top: 8,
+                top: 8, // 🔹 Elimina el espacio superior entre los dos bodies
               ),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
