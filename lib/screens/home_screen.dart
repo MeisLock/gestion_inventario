@@ -1,33 +1,35 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:gestion_inventario/screens/add_screen.dart';
+import 'package:gestion_inventario/screens/edit_product_screen.dart';
 import 'package:gestion_inventario/screens/menu_screen.dart';
-import 'package:gestion_inventario/widgets/dialog_confirmacion.dart';
 import 'package:gestion_inventario/widgets/dialog_cerrar_sesion.dart';
-import 'package:gestion_inventario/widgets/product_card.dart';
+import 'package:gestion_inventario/widgets/dialog_confirmacion.dart';
 import '../services/firebase_service.dart';
-// 🔹 Removemos los imports que no se usan
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreen();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreen extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> {
   final FirebaseService _firebaseService = FirebaseService();
-
   final TextEditingController _searchController = TextEditingController();
-  String _busqueda = "";
 
+  String _busqueda = "";
   double? _precioMin;
   double? _precioMax;
   String? _sistemaOperativo;
   bool? _enStock;
 
-  // Función para mostrar el modal de filtros
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   void _mostrarFiltros() {
     showModalBottomSheet(
       context: context,
@@ -98,7 +100,10 @@ class _HomeScreen extends State<HomeScreen> {
                       isExpanded: true,
                       underline: const SizedBox(),
                       items: ["Android", "IOS"].map((e) {
-                        return DropdownMenuItem(value: e, child: Text(e));
+                        return DropdownMenuItem<String>(
+                          value: e,
+                          child: Text(e),
+                        );
                       }).toList(),
                       onChanged: (value) {
                         setModalState(() {
@@ -149,6 +154,89 @@ class _HomeScreen extends State<HomeScreen> {
     );
   }
 
+  Widget _buildProductCard({
+    required BuildContext context,
+    required QueryDocumentSnapshot<Object?> doc,
+  }) {
+    final producto = doc.data() as Map<String, dynamic>;
+
+    final String nombre = (producto["nombre"] ?? "Sin nombre").toString();
+    final double precio = (producto["precio"] ?? 0).toDouble();
+
+    return Card(
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Stack(
+              children: [
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEFF3F8),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(14),
+                      topRight: Radius.circular(14),
+                    ),
+                  ),
+                  child: const Center(
+                    child: Icon(
+                      Icons.image_outlined,
+                      size: 42,
+                      color: Color(0xFF9DB2CE),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: CircleAvatar(
+                    radius: 18,
+                    backgroundColor: Colors.white,
+                    child: IconButton(
+                      padding: EdgeInsets.zero,
+                      iconSize: 18,
+                      icon: const Icon(Icons.edit),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => EditProductScreen(
+                              productId: doc.id,
+                              productData: producto,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(10, 10, 10, 4),
+            child: Text(
+              nombre,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+            child: Text(
+              precio.toString(),
+              style: const TextStyle(fontSize: 13),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -156,7 +244,6 @@ class _HomeScreen extends State<HomeScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      // 🔹 Movemos el ListView a la pantalla de menu_screen
       backgroundColor: colorScheme.surface,
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) => [
@@ -166,30 +253,33 @@ class _HomeScreen extends State<HomeScreen> {
             iconTheme: IconThemeData(color: colorScheme.onSurface),
             floating: true,
             snap: true,
-            leading: Padding(// 🔹 Añadir un Padding para poder poner margenes para centrar el Icono
-              padding: const EdgeInsets.only(left: 20), 
-              child:
-              IconButton(
+            leading: Padding(
+              // 🔹 Añadir un Padding para poder poner margenes para centrar el Icono
+              padding: const EdgeInsets.only(left: 20),
+              child: IconButton(
                 onPressed: () {
-                  showGeneralDialog( // 🔹 Creado un Dialog para el submenu de opciones
-                      context: context,
-                      barrierLabel: 'menu',
-                      barrierDismissible: true,
-                      barrierColor: Colors.transparent,
-                      pageBuilder: (context, animation, secondaryAnimation) {
-                        return const MenuScreenWidget();
-                      },
-                    );
+                  showGeneralDialog(
+                    // 🔹 Creado un Dialog para el submenu de opciones
+                    context: context,
+                    barrierLabel: 'menu',
+                    barrierDismissible: true,
+                    barrierColor: Colors.transparent,
+                    pageBuilder: (context, animation, secondaryAnimation) {
+                      return const MenuScreenWidget();
+                    },
+                  );
                 },
                 icon: const Icon(Icons.menu),
               ),
             ),
             actions: [
               IconButton(
-                onPressed: () => mostrarDialogoCerrarSesion(context), // 🔹 Agregamos el metodo para el AlertDialog para cerrar sesión
+                onPressed: () => mostrarDialogoCerrarSesion(
+                  context,
+                ), // 🔹 Agregamos el metodo para el AlertDialog para cerrar sesión
                 icon: const Icon(Icons.logout),
               ),
-              const SizedBox(width: 14,)//🔹 Modificación para centrarlo más
+              const SizedBox(width: 14), //🔹 Modificación para centrarlo más
             ],
             title: Text(
               'Menu',
@@ -268,19 +358,20 @@ class _HomeScreen extends State<HomeScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 140),
+                        const Spacer(),
                         OutlinedButton.icon(
-                          onPressed: () {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(builder: (_) => AddScreen()),
+                          onPressed: () => mostrarDialogoConfirmacion(
+                            context,
+                            titulo: 'Añadir Producto',
+                            mensaje: '¿Quieres añadir un producto?',
+                            onAceptar: () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(builder: (_) => AddScreen()),
                               );
-                              },
-
-                          icon: Icon(
-                            Icons.add,
-                            color: colorScheme.primary,
+                            },
                           ),
+                          icon: Icon(Icons.add, color: colorScheme.primary),
                           label: Text(
                             'Nuevo',
                             style: TextStyle(color: colorScheme.onSurface),
@@ -310,9 +401,11 @@ class _HomeScreen extends State<HomeScreen> {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             }
+
             if (snapshot.hasError) {
               return const Center(child: Text('Error al cargar productos'));
             }
+
             if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
               return const Center(child: Text('No hay productos'));
             }
@@ -322,23 +415,21 @@ class _HomeScreen extends State<HomeScreen> {
             final productosFiltrados = productosFirebase.where((doc) {
               final data = doc.data() as Map<String, dynamic>;
 
-              final nombre =
-                  (data["nombre"] ?? "").toString().toLowerCase();
+              final nombre = (data["nombre"] ?? "").toString().toLowerCase();
               final precio = (data["precio"] ?? 0).toDouble();
               final stock = (data["stock"] ?? 0) as int;
 
-              final sistema = ((data["sistema"] ??
-                          data["sistemaOperativo"] ??
-                          data["SO"] ??
-                          "")
-                      .toString())
-                  .trim()
-                  .toUpperCase();
-              final filtroSistema =
-                  _sistemaOperativo?.trim().toUpperCase();
+              final sistema =
+                  ((data["sistema"] ??
+                              data["sistemaOperativo"] ??
+                              data["SO"] ??
+                              "")
+                          .toString())
+                      .trim()
+                      .toUpperCase();
+              final filtroSistema = _sistemaOperativo?.trim().toUpperCase();
 
-              if (_busqueda.isNotEmpty &&
-                  !nombre.contains(_busqueda)) {
+              if (_busqueda.isNotEmpty && !nombre.contains(_busqueda)) {
                 return false;
               }
 
@@ -350,8 +441,7 @@ class _HomeScreen extends State<HomeScreen> {
                 return false;
               }
 
-              if (filtroSistema != null &&
-                  filtroSistema.isNotEmpty) {
+              if (filtroSistema != null && filtroSistema.isNotEmpty) {
                 if (sistema != filtroSistema) {
                   return false;
                 }
@@ -364,27 +454,29 @@ class _HomeScreen extends State<HomeScreen> {
               return true;
             }).toList();
 
+            if (productosFiltrados.isEmpty) {
+              return const Center(
+                child: Text('No hay productos con esos filtros'),
+              );
+            }
+
             return GridView.builder(
               padding: const EdgeInsets.only(
                 left: 20,
                 right: 20,
                 bottom: 20,
                 top: 8, // 🔹 Elimina el espacio superior entre los dos bodies
-                ),
+              ),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
+                childAspectRatio: 0.72,
               ),
               itemCount: productosFiltrados.length,
               itemBuilder: (context, index) {
-                final producto =
-                    productosFiltrados[index].data() as Map<String, dynamic>;
-
-                return ProductCard(
-                  nombre: producto["nombre"] as String,
-                  precio: (producto["precio"] ?? 0).toDouble(),
-                );
+                final doc = productosFiltrados[index];
+                return _buildProductCard(context: context, doc: doc);
               },
             );
           },
