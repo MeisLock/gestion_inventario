@@ -3,6 +3,9 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gestion_inventario/services/firebase/firebase_service.dart';
+import 'package:dotted_border/dotted_border.dart';
+import 'package:gestion_inventario/services/select_image.dart';
+import 'package:gestion_inventario/services/firebase/upload_image.dart';
 
 class EditProductScreen extends StatefulWidget {
   final String productId;
