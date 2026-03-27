@@ -1,9 +1,18 @@
+import 'dart:io';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:gestion_inventario/services/firebase_service.dart';
+import 'package:dotted_border/dotted_border.dart';
+import 'package:gestion_inventario/services/select_image.dart';
+import 'package:gestion_inventario/services/firebase/upload_image.dart';
+
+
 
 class EditProductScreen extends StatefulWidget {
   final String productId;
   final Map<String, dynamic> productData;
+
+  
 
   const EditProductScreen({
     super.key,
@@ -20,6 +29,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
   late final TextEditingController _descripcionController;
   late final TextEditingController _precioController;
   late final TextEditingController _stockController;
+  File? imagenToEdit;
 
   String? _sistemaOperativo;
   bool _guardando = false;
@@ -59,6 +69,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
     final descripcion = _descripcionController.text.trim();
     final precio = double.tryParse(_precioController.text.trim());
     final stock = int.tryParse(_stockController.text.trim());
+    if (imagenToEdit != null)  await uploadImage(imagenToEdit!);
 
     if (nombre.isEmpty ||
         descripcion.isEmpty ||
@@ -79,17 +90,17 @@ class _EditProductScreenState extends State<EditProductScreen> {
     });
 
     try {
-      final String imageUrl = widget.productData['imageUrl']?.toString() ?? '';
-
-      await _firebaseService.updateProduct(
-        id: widget.productId,
-        nombre: nombre,
-        descripcion: descripcion,
-        sistemaOperativo: _sistemaOperativo!,
-        stock: stock,
-        precio: precio,
-        imageUrl: imageUrl,
-      );
+      await FirebaseFirestore.instance
+          .collection('Productos')
+          .doc(widget.productId)
+          .update({
+            'nombre': nombre,
+            'descripcion': descripcion,
+            'precio': precio,
+            'stock': stock,
+            'sistemaOperativo': _sistemaOperativo,
+            if (imagenToEdit != null) 'imageUrl':imageUrl
+          });
 
       if (!mounted) return;
 
@@ -114,6 +125,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(title: const Text('Editar producto'), centerTitle: true),
       body: SingleChildScrollView(
@@ -176,6 +188,40 @@ class _EditProductScreenState extends State<EditProductScreen> {
                 border: OutlineInputBorder(),
               ),
             ),
+            const SizedBox(height: 15),
+                    SizedBox(
+                      height: 150, // 🔹 Altura fija en vez de Expanded
+                      width: double.infinity,
+                      child: DottedBorder(
+                        borderType: BorderType.RRect,
+                        radius: const Radius.circular(12),
+                        dashPattern: const [8, 2],
+                        color: colorScheme.onSurface,
+                        strokeWidth: 1.5,
+                        child: Center(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,  
+                          children: [
+                              imagenToEdit != null ? Image.file(imagenToEdit!) :
+                              OutlinedButton.icon(
+                                onPressed:() async{
+                                  final imagen =await getImage();
+                                  if(imagen == null) return;
+                                  setState(() {
+                                    imagenToEdit = File(imagen.path);
+                                  });
+                                }, 
+                                label: Text('Imagen'),
+                                icon: Icon(Icons.add_a_photo_outlined),
+                                style: OutlinedButton.styleFrom(
+                                  side: BorderSide.none
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
             const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
@@ -185,6 +231,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                 child: _guardando
                     ? const CircularProgressIndicator()
                     : const Text('Guardar cambios'),
+                    
               ),
             ),
           ],
