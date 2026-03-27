@@ -183,32 +183,74 @@ class _HomeScreenState extends State<HomeScreen> {
                       topRight: Radius.circular(14),
                     ),
                   ),
-                  child:  Center(
-                    child: Image.network(imageUrl),
-                  ),
+                  child: Center(child: Image.network(imageUrl)),
                 ),
                 Positioned(
                   top: 8,
                   right: 8,
-                  child: CircleAvatar(
-                    radius: 18,
-                    backgroundColor: Colors.white,
-                    child: IconButton(
-                      padding: EdgeInsets.zero,
-                      iconSize: 18,
-                      icon: const Icon(Icons.edit),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => EditProductScreen(
-                              productId: doc.id,
-                              productData: producto,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircleAvatar(
+                        radius: 18,
+                        backgroundColor: Colors.white,
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          iconSize: 18,
+                          icon: const Icon(Icons.edit),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => EditProductScreen(
+                                  productId: doc.id,
+                                  productData: producto,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      CircleAvatar(
+                        radius: 18,
+                        backgroundColor: Colors.white,
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          iconSize: 18,
+                          icon: const Icon(Icons.delete),
+                          onPressed: () async {
+                            final confirmar = await showDialog<bool>(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  title: const Text('Eliminar producto'),
+                                  content: const Text(
+                                    '¿Quieres eliminar este producto?',
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.pop(context, false),
+                                      child: const Text('Cancelar'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.pop(context, true),
+                                      child: const Text('Eliminar'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+
+                            if (confirmar != true) return;
+
+                            await _firebaseService.deleteProduct(doc.id);
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -223,6 +265,7 @@ class _HomeScreenState extends State<HomeScreen> {
               style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
             ),
           ),
+
           Padding(
             padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
             child: Text(
