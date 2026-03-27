@@ -164,15 +164,13 @@ class _AddScreenState extends State<AddScreen> {
         centerTitle: true,
         actions: [
           IconButton(
-            onPressed: () {},
-            icon: Icon(Icons.account_circle_outlined),
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => ProfileScreen()),
               );
             },
-            icon: Icon(Icons.account_circle_outlined),
+            icon: const Icon(Icons.account_circle_outlined),
           ),
           const SizedBox(width: 14),
         ],
