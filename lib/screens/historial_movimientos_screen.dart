@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:gestion_inventario/services/firebase_service.dart';
+import 'package:gestion_inventario/services/firebase/firebase_service.dart';
 
 class HistorialMovimientosScreen extends StatelessWidget {
   HistorialMovimientosScreen({super.key});
