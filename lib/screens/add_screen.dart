@@ -10,29 +10,29 @@ import 'package:gestion_inventario/services/upload_image.dart';
 import 'package:gestion_inventario/widgets/build_label.dart';
 import 'package:gestion_inventario/widgets/custom_text_field.dart';
 
-class AddScreen extends StatefulWidget{
+class AddScreen extends StatefulWidget {
   const AddScreen({super.key});
 
   @override
   State<AddScreen> createState() => _AddScreenState();
 }
 
-class _AddScreenState extends State<AddScreen>{
+class _AddScreenState extends State<AddScreen> {
   String? _sistemaOperativo;
   int _stock = 0;
   File? imagenToUpload;
 
-//Servicio con Firebase
+  //Servicio con Firebase
   final FirebaseService _firebaseService = FirebaseService();
 
-//Leer campos de texto que ha escrito el usuario
+  //Leer campos de texto que ha escrito el usuario
   final TextEditingController _nombreController = TextEditingController();
   final TextEditingController _descripcionController = TextEditingController();
   final TextEditingController _precioController = TextEditingController();
 
   bool _isLoading = false;
 
-//Eliminacion de recursos 
+  //Eliminacion de recursos
   @override
   void dispose() {
     _nombreController.dispose();
@@ -41,164 +41,140 @@ class _AddScreenState extends State<AddScreen>{
     super.dispose();
   }
 
-Future<void> _saveProduct() async {
-  final nombre = _nombreController.text.trim();
-  final descripcion = _descripcionController.text.trim();
-  final precioTexto = _precioController.text.trim();
-  
-            
+  Future<void> _saveProduct() async {
+    final nombre = _nombreController.text.trim();
+    final descripcion = _descripcionController.text.trim();
+    final precioTexto = _precioController.text.trim();
 
-  // Validación básica
-  if (nombre.isEmpty || descripcion.isEmpty || precioTexto.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Completa todos los campos'),
-      ),
-    );
-    return;
-  }
-
-  if (_sistemaOperativo == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Selecciona un sistema operativo'),
-      ),
-    );
-    return;
-  }
-
-  final precio = double.tryParse(precioTexto);
-  if (precio == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Precio inválido'),
-      ),
-    );
-    return;
-  }
-   if (imagenToUpload == null){
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('añade una imagen'),
-      ),
-    );
-    return;
-  }
-   await uploadImage(imagenToUpload!); //sube la imagen a firestorage
-
-
-  // Confirmación
-  final confirmar = await showDialog<bool>(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: const Text('Añadir producto'),
-        content: const Text('¿Quieres añadir este producto?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Añadir'),
-          ),
-        ],
+    // Validación básica
+    if (nombre.isEmpty || descripcion.isEmpty || precioTexto.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Completa todos los campos')),
       );
-    },
-  );
+      return;
+    }
 
-  if (confirmar != true) return;
+    if (_sistemaOperativo == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Selecciona un sistema operativo')),
+      );
+      return;
+    }
 
-  setState(() {
-    _isLoading = true;
-  });
+    final precio = double.tryParse(precioTexto);
+    if (precio == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Precio inválido')));
+      return;
+    }
+    if (imagenToUpload == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('añade una imagen')));
+      return;
+    }
+    await uploadImage(imagenToUpload!); //sube la imagen a firestorage
 
-  try {
-    await _firebaseService.addProduct(
-      nombre: nombre,
-      descripcion: descripcion,
-      sistemaOperativo: _sistemaOperativo!,
-      stock: _stock,
-      precio: precio,
-      imageUrl: imageUrl,
+    // Confirmación
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Añadir producto'),
+          content: const Text('¿Quieres añadir este producto?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Añadir'),
+            ),
+          ],
+        );
+      },
     );
 
-    if (!mounted) return;
+    if (confirmar != true) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Producto añadido correctamente'),
-      ),
-    );
+    setState(() {
+      _isLoading = true;
+    });
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
-    );
+    try {
+      await _firebaseService.addProduct(
+        nombre: nombre,
+        descripcion: descripcion,
+        sistemaOperativo: _sistemaOperativo!,
+        stock: _stock,
+        precio: precio,
+        imageUrl: imageUrl,
+      );
 
-  } catch (e) {
-    if (!mounted) return;
+      if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Error: $e'),
-      ),
-    );
-  } finally {
-    if (mounted) {
-      setState(() {
-        _isLoading = false;
-      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Producto añadido correctamente')),
+      );
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
 
     return Scaffold(
       appBar: AppBar(
         leading: Padding(
-          padding: const EdgeInsets.only(left: 20,),
+          padding: const EdgeInsets.only(left: 20),
           child: IconButton(
-            onPressed: () { 
+            onPressed: () {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (_) => HomeScreen()) 
-                );
-            }, 
+                MaterialPageRoute(builder: (_) => HomeScreen()),
+              );
+            },
             icon: Icon(Icons.navigate_before),
           ),
         ),
-        title: Text('Añadir un producto', style: TextStyle(
-          color: colorScheme.onSurface,
-          ),
-        
+        title: Text(
+          'Añadir un producto',
+          style: TextStyle(color: colorScheme.onSurface),
         ),
         centerTitle: true,
         actions: [
           IconButton(
-            onPressed:() {
-              
-            }, 
-            icon:   Icon(Icons.account_circle_outlined)
+            onPressed: () {},
+            icon: Icon(Icons.account_circle_outlined),
           ),
-          const SizedBox(width: 14,)
-        ],  
+          const SizedBox(width: 14),
+        ],
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(20),
         child: ElevatedButton.icon(
           onPressed: _isLoading ? null : _saveProduct,
           icon: Icon(Icons.check, color: colorScheme.onPrimary),
-          label: Text(
-            'Añadir',
-            style: TextStyle(color: colorScheme.onPrimary),
-          ),
+          label: Text('Añadir', style: TextStyle(color: colorScheme.onPrimary)),
           style: ElevatedButton.styleFrom(
             backgroundColor: colorScheme.primary,
             minimumSize: const Size(double.infinity, 50),
@@ -220,8 +196,7 @@ Future<void> _saveProduct() async {
               strokeWidth: 1.5,
               child: Padding(
                 padding: EdgeInsets.all(20),
-                child: 
-                Column(
+                child: Column(
                   children: [
                     buildLabel('Nombre del producto', colorScheme),
                     const SizedBox(height: 8),
@@ -233,7 +208,7 @@ Future<void> _saveProduct() async {
                     buildLabel('Descripción del producto', colorScheme),
                     const SizedBox(height: 8),
                     CustomTextField(
-                      hintText: 'Descripción', 
+                      hintText: 'Descripción',
                       maxLines: 4,
                       controller: _descripcionController,
                     ),
@@ -256,8 +231,8 @@ Future<void> _saveProduct() async {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             tileColor: _sistemaOperativo == 'IOS'
-                            ? colorScheme.primaryContainer
-                            : colorScheme.surfaceContainerHighest,
+                                ? colorScheme.primaryContainer
+                                : colorScheme.surfaceContainerHighest,
                           ),
                           const SizedBox(height: 8),
                           RadioListTile<String>(
@@ -267,8 +242,8 @@ Future<void> _saveProduct() async {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             tileColor: _sistemaOperativo == 'Android'
-                            ? colorScheme.primaryContainer
-                            : colorScheme.surfaceContainerHighest,
+                                ? colorScheme.primaryContainer
+                                : colorScheme.surfaceContainerHighest,
                           ),
                         ],
                       ),
@@ -289,7 +264,10 @@ Future<void> _saveProduct() async {
                                 if (_stock > 0) _stock--;
                               });
                             },
-                            icon: Icon(Icons.remove, color: colorScheme.primary),
+                            icon: Icon(
+                              Icons.remove,
+                              color: colorScheme.primary,
+                            ),
                             style: IconButton.styleFrom(
                               backgroundColor: colorScheme.primaryContainer,
                               shape: RoundedRectangleBorder(
@@ -327,7 +305,7 @@ Future<void> _saveProduct() async {
                               ),
                             ),
                           ),
-                        )
+                        ),
                       ],
                     ),
                     const SectionDivider(),
@@ -336,10 +314,14 @@ Future<void> _saveProduct() async {
                     CustomTextField(
                       hintText: 'Precio',
                       controller: _precioController,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       suffixIcon: const Icon(Icons.euro_symbol),
                       inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d*\.?\d{0,2}'),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 15),
@@ -355,22 +337,23 @@ Future<void> _saveProduct() async {
                         child: Center(
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                              imagenToUpload != null ? Image.file(imagenToUpload!) :
-                              OutlinedButton.icon(
-                                onPressed:() async{
-                                  final imagen =await getImage();
-                                  if(imagen == null) return;
-                                  setState(() {
-                                    imagenToUpload = File(imagen.path);
-                                  });
-                                }, 
-                                label: Text('Imagen'),
-                                icon: Icon(Icons.add_a_photo_outlined),
-                                style: OutlinedButton.styleFrom(
-                                  side: BorderSide.none
-                                ),
-                              )
+                            children: [
+                              imagenToUpload != null
+                                  ? Image.file(imagenToUpload!)
+                                  : OutlinedButton.icon(
+                                      onPressed: () async {
+                                        final imagen = await getImage();
+                                        if (imagen == null) return;
+                                        setState(() {
+                                          imagenToUpload = File(imagen.path);
+                                        });
+                                      },
+                                      label: Text('Imagen'),
+                                      icon: Icon(Icons.add_a_photo_outlined),
+                                      style: OutlinedButton.styleFrom(
+                                        side: BorderSide.none,
+                                      ),
+                                    ),
                             ],
                           ),
                         ),
@@ -378,14 +361,15 @@ Future<void> _saveProduct() async {
                     ),
                   ],
                 ),
-              ) 
-            )
+              ),
+            ),
           ),
         ),
-      )
+      ),
     );
   }
 }
+
 // 🔹 Widget perosnalizado para los separadores
 class SectionDivider extends StatelessWidget {
   const SectionDivider({super.key});
