@@ -33,6 +33,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
 
   String? _sistemaOperativo;
   bool _guardando = false;
+  final FirebaseService _firebaseService = FirebaseService();
 
   @override
   void initState() {
@@ -109,6 +110,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
 
       Navigator.pop(context);
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error al actualizar el producto: $e')),
       );

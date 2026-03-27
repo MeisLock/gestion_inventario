@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:gestion_inventario/theme/theme_controller.dart';
 import 'package:gestion_inventario/widgets/dialog_cerrar_sesion.dart';
+import 'package:gestion_inventario/screens/historial_movimientos_screen.dart';
 
 class MenuScreenWidget extends StatefulWidget {
   const MenuScreenWidget({super.key});
@@ -11,9 +12,14 @@ class MenuScreenWidget extends StatefulWidget {
 }
 
 class _MenuScreenStateWidget extends State<MenuScreenWidget> {
-
   // 🔹 Método para poder crear las diferentes opciones del menu
-  Widget _buildMenuTile(BuildContext context, IconData icon, String title, VoidCallback onTap, ColorScheme colorScheme) {
+  Widget _buildMenuTile(
+    BuildContext context,
+    IconData icon,
+    String title,
+    VoidCallback onTap,
+    ColorScheme colorScheme,
+  ) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
@@ -30,7 +36,6 @@ class _MenuScreenStateWidget extends State<MenuScreenWidget> {
 
   @override
   Widget build(BuildContext context) {
-  
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = ThemeController.themeMode.value == ThemeMode.dark;
 
@@ -107,7 +112,7 @@ class _MenuScreenStateWidget extends State<MenuScreenWidget> {
                     ),
                   ),
                   // 🔹 ListView previamente creado + añadir el widget buildList
-                   ListView(
+                  ListView(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     padding: EdgeInsets.zero,
@@ -124,6 +129,21 @@ class _MenuScreenStateWidget extends State<MenuScreenWidget> {
                         Icons.inventory,
                         'Productos',
                         () => Navigator.pop(context),
+                        colorScheme,
+                      ),
+                      _buildMenuTile(
+                        context,
+                        Icons.history,
+                        'Historial de movimientos',
+                        () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => HistorialMovimientosScreen(),
+                            ),
+                          );
+                        },
                         colorScheme,
                       ),
                       _buildMenuTile(
