@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:gestion_inventario/services/firebase_service.dart';
+import 'package:gestion_inventario/services/firebase/firebase_service.dart';
 
 //  Cambios para que los colores de los textos cambien segun el tema de aplicación
 

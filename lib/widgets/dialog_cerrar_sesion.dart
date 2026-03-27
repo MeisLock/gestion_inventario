@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:gestion_inventario/screens/login_screen.dart';
+import 'package:gestion_inventario/screens/login/login_screen.dart';
 
 Future<void> mostrarDialogoCerrarSesion(BuildContext context) async{
   final eleccion = await showDialog<bool>(

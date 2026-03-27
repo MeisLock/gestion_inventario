@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:gestion_inventario/screens/add_screen.dart';
 import 'package:gestion_inventario/screens/edit_product_screen.dart';
 import 'package:gestion_inventario/screens/menu_screen.dart';
+import 'package:gestion_inventario/screens/profile_screen.dart';
 import 'package:gestion_inventario/widgets/dialog_cerrar_sesion.dart';
 import 'package:gestion_inventario/widgets/dialog_confirmacion.dart';
-import '../services/firebase_service.dart';
+import '../../services/firebase/firebase_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -271,12 +272,14 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             actions: [
               IconButton(
-                onPressed: () => mostrarDialogoCerrarSesion(
-                  context,
-                ), // 🔹 Agregamos el metodo para el AlertDialog para cerrar sesión
-                icon: const Icon(Icons.logout),
+                onPressed: () { 
+                  Navigator.push(
+                    context, 
+                    MaterialPageRoute(builder: (_) => ProfileScreen()));
+                },
+                icon: const Icon(Icons.account_circle_outlined),
               ),
-              const SizedBox(width: 14), //🔹 Modificación para centrarlo más
+              const SizedBox(width: 14),
             ],
             title: Text(
               'Menu',
