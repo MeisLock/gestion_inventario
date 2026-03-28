@@ -76,7 +76,7 @@ class _AddScreenState extends State<AddScreen> {
       return;
     }
     await uploadImage(imagenToUpload!); //sube la imagen a firestorage
-
+    if (!mounted) return;
     // Confirmación
     final confirmar = await showDialog<bool>(
       context: context,
