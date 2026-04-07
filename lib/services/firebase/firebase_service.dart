@@ -14,7 +14,6 @@ class FirebaseService {
     return await ref.getDownloadURL();
   }
 
-  // 🔹 Guardar un producto en Firestore
   Future<void> addProduct({
     required String nombre,
     required String descripcion,
@@ -60,7 +59,6 @@ class FirebaseService {
     );
   }
 
-  //Guardar usuario en Firestore al registrarse
   Future<void> guardarUsuario({
     required String uid,
     required String nombre,
@@ -77,7 +75,6 @@ class FirebaseService {
     });
   }
 
-  // Registrar movimiento de stock / producto
   Future<void> registrarMovimiento({
     required String productoId,
     required String nombreProducto,
@@ -99,12 +96,10 @@ class FirebaseService {
     });
   }
 
-  // Obtener productos en tiempo real para mostrarlos en HomeScreen
   Stream<QuerySnapshot> getProductos() {
     return _firestore.collection('Productos').snapshots();
   }
 
-  // Obtener historial de movimientos
   Stream<QuerySnapshot> getMovimientos() {
     return _firestore
         .collection('movimientos')
@@ -112,7 +107,6 @@ class FirebaseService {
         .snapshots();
   }
 
-  // Actulizar el stock de un producto
   Future<void> updateProduct({
     required String id,
     required String nombre,
@@ -161,7 +155,6 @@ class FirebaseService {
     );
   }
 
-  // Eliminar un producto
   Future<void> deleteProduct(String id) async {
     final doc = await _firestore.collection('Productos').doc(id).get();
 

@@ -17,7 +17,6 @@ class _LoginScreen extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  //  variable para controlar la visibilidad de la contraseña con bool y un IconButton en el TextField
   bool _obscurePassword = true;
 
   Future<void> _login() async {
@@ -191,7 +190,6 @@ class _LoginScreen extends State<LoginScreen> {
               buildLabel('Contraseña', colorScheme),
               const SizedBox(height: 8),
 
-              // Aquí añadimos el TextField para la contraseña con el IconButton para mostrar/ocultar la contraseña
               TextField(
                 controller: _passwordController,
                 obscureText: _obscurePassword,
@@ -260,7 +258,7 @@ class _LoginScreen extends State<LoginScreen> {
                   ),
                 ),
               ),
-
+              const SizedBox(height: 12,),
               Row(
                 children: [
                   Expanded(
