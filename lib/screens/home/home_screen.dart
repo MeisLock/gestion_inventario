@@ -1,10 +1,12 @@
+import 'dart:ui';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:gestion_inventario/screens/add_screen.dart';
-import 'package:gestion_inventario/screens/edit_product_screen.dart';
-import 'package:gestion_inventario/screens/menu_screen.dart';
+import 'package:gestion_inventario/screens/home/screens/add_screen.dart';
+import 'package:gestion_inventario/screens/home/screens/edit_product_screen.dart';
+import 'package:gestion_inventario/screens/home/widgets/product_card.dart';
+import 'package:gestion_inventario/screens/home/screens/menu_screen.dart';
 import 'package:gestion_inventario/screens/profile_screen.dart';
-import 'package:gestion_inventario/widgets/dialog_cerrar_sesion.dart';
 import 'package:gestion_inventario/widgets/dialog_confirmacion.dart';
 import '../../services/firebase/firebase_service.dart';
 
@@ -155,129 +157,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildProductCard({
-    required BuildContext context,
-    required QueryDocumentSnapshot<Object?> doc,
-  }) {
-    final producto = doc.data() as Map<String, dynamic>;
-
-    final String nombre = (producto["nombre"] ?? "Sin nombre").toString();
-    final double precio = (producto["precio"] ?? 0).toDouble();
-    final String imageUrl = (producto["imageUrl"] ?? "no url");
-
-    return Card(
-      elevation: 3,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Stack(
-              children: [
-                Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFEFF3F8),
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(14),
-                      topRight: Radius.circular(14),
-                    ),
-                  ),
-                  child: Center(child: Image.network(imageUrl)),
-                ),
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      CircleAvatar(
-                        radius: 18,
-                        backgroundColor: Colors.white,
-                        child: IconButton(
-                          padding: EdgeInsets.zero,
-                          iconSize: 18,
-                          icon: const Icon(Icons.edit),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => EditProductScreen(
-                                  productId: doc.id,
-                                  productData: producto,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      CircleAvatar(
-                        radius: 18,
-                        backgroundColor: Colors.white,
-                        child: IconButton(
-                          padding: EdgeInsets.zero,
-                          iconSize: 18,
-                          icon: const Icon(Icons.delete),
-                          onPressed: () async {
-                            final confirmar = await showDialog<bool>(
-                              context: context,
-                              builder: (context) {
-                                return AlertDialog(
-                                  title: const Text('Eliminar producto'),
-                                  content: const Text(
-                                    '¿Quieres eliminar este producto?',
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () =>
-                                          Navigator.pop(context, false),
-                                      child: const Text('Cancelar'),
-                                    ),
-                                    TextButton(
-                                      onPressed: () =>
-                                          Navigator.pop(context, true),
-                                      child: const Text('Eliminar'),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-
-                            if (confirmar != true) return;
-
-                            await _firebaseService.deleteProduct(doc.id);
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(10, 10, 10, 4),
-            child: Text(
-              nombre,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
-            ),
-          ),
-
-          Padding(
-            padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
-            child: Text(
-              precio.toString(),
-              style: const TextStyle(fontSize: 13),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -295,12 +174,10 @@ class _HomeScreenState extends State<HomeScreen> {
             floating: true,
             snap: true,
             leading: Padding(
-              // 🔹 Añadir un Padding para poder poner margenes para centrar el Icono
               padding: const EdgeInsets.only(left: 20),
               child: IconButton(
                 onPressed: () {
                   showGeneralDialog(
-                    // 🔹 Creado un Dialog para el submenu de opciones
                     context: context,
                     barrierLabel: 'menu',
                     barrierDismissible: true,
@@ -315,10 +192,11 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             actions: [
               IconButton(
-                onPressed: () { 
+                onPressed: () {
                   Navigator.push(
-                    context, 
-                    MaterialPageRoute(builder: (_) => ProfileScreen()));
+                    context,
+                    MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                  );
                 },
                 icon: const Icon(Icons.account_circle_outlined),
               ),
@@ -461,46 +339,26 @@ class _HomeScreenState extends State<HomeScreen> {
               final nombre = (data["nombre"] ?? "").toString().toLowerCase();
               final precio = (data["precio"] ?? 0).toDouble();
               final stock = (data["stock"] ?? 0) as int;
-
-              final sistema =
-                  ((data["sistema"] ??
-                              data["sistemaOperativo"] ??
-                              data["SO"] ??
-                              "")
-                          .toString())
-                      .trim()
-                      .toUpperCase();
+              final sistema = ((data["sistema"] ??
+                          data["sistemaOperativo"] ??
+                          data["SO"] ??
+                          "")
+                      .toString())
+                  .trim()
+                  .toUpperCase();
               final filtroSistema = _sistemaOperativo?.trim().toUpperCase();
 
-              if (_busqueda.isNotEmpty && !nombre.contains(_busqueda)) {
-                return false;
-              }
-
-              if (_precioMin != null && precio < _precioMin!) {
-                return false;
-              }
-
-              if (_precioMax != null && precio > _precioMax!) {
-                return false;
-              }
-
-              if (filtroSistema != null && filtroSistema.isNotEmpty) {
-                if (sistema != filtroSistema) {
-                  return false;
-                }
-              }
-
-              if (_enStock == true && stock <= 0) {
-                return false;
-              }
+              if (_busqueda.isNotEmpty && !nombre.contains(_busqueda)) return false;
+              if (_precioMin != null && precio < _precioMin!) return false;
+              if (_precioMax != null && precio > _precioMax!) return false;
+              if (filtroSistema != null && filtroSistema.isNotEmpty && sistema != filtroSistema) return false;
+              if (_enStock == true && stock <= 0) return false;
 
               return true;
             }).toList();
 
             if (productosFiltrados.isEmpty) {
-              return const Center(
-                child: Text('No hay productos con esos filtros'),
-              );
+              return const Center(child: Text('No hay productos con esos filtros'));
             }
 
             return GridView.builder(
@@ -508,7 +366,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 left: 20,
                 right: 20,
                 bottom: 20,
-                top: 8, // 🔹 Elimina el espacio superior entre los dos bodies
+                top: 8,
               ),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
@@ -519,7 +377,74 @@ class _HomeScreenState extends State<HomeScreen> {
               itemCount: productosFiltrados.length,
               itemBuilder: (context, index) {
                 final doc = productosFiltrados[index];
-                return _buildProductCard(context: context, doc: doc);
+                final producto = doc.data() as Map<String, dynamic>;
+
+                final String nombre = (producto["nombre"] ?? "Sin nombre").toString();
+                final double precio = (producto["precio"] ?? 0).toDouble();
+                final String imageUrl = (producto["imageUrl"] ?? "").toString();
+                final String descripcion = (producto["descripcion"] ?? "Sin descripción").toString();
+                final int stock = (producto["stock"] ?? 0) as int;
+
+                return Stack(
+                  children: [
+                    ProductCard(
+                      nombre: nombre,
+                      precio: precio,
+                      imageUrl: imageUrl,
+                      descripcion: descripcion,
+                      stock: stock,
+                    ),
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircleAvatar(
+                            radius: 16,
+                            backgroundColor: Colors.white,
+                            child: IconButton(
+                              padding: EdgeInsets.zero,
+                              iconSize: 16,
+                              icon: const Icon(Icons.edit),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => EditProductScreen(
+                                      productId: doc.id,
+                                      productData: producto,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          CircleAvatar(
+                            radius: 16,
+                            backgroundColor: Colors.white,
+                            child: IconButton(
+                              padding: EdgeInsets.zero,
+                              iconSize: 16,
+                              color: const Color.fromARGB(255, 191, 50, 40),
+                              icon: const Icon(Icons.delete),
+                              onPressed: () => mostrarDialogoConfirmacion(
+                                context,
+                                titulo: 'Eliminar producto',
+                                mensaje: '¿Quieres eliminar este producto?',
+                                textoAceptar: 'Eliminar',
+                                onAceptar: () async {
+                                  await _firebaseService.deleteProduct(doc.id);
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
               },
             );
           },

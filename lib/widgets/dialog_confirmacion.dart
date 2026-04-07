@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-// 🔹 Creación de un Dialog personalizado para la creación de productos
-
 Future<void> mostrarDialogoConfirmacion(
   BuildContext context, {
   required String titulo,
